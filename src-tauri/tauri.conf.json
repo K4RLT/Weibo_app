@@ -5,7 +5,7 @@
   "identifier": "com.weibo.desktop.app",
   "build": {
     "frontendDist": "../src",
-    "devUrl": "../src"
+    "devUrl": "http://localhost:1420"
   },
   "app": {
     "withGlobalTauri": true,
