@@ -142,6 +142,40 @@
         <button id="btnCloseSettings" class="modal-close">&times;</button>
       </div>
       <div class="modal-body">
+
+        <!-- App Icon Picker -->
+        <div class="setting-group">
+          <label>🖼️ App Icon Style</label>
+          <p class="setting-desc">Choose your preferred dock &amp; taskbar icon. Takes effect on next launch.</p>
+          <div class="icon-picker-grid" id="iconPickerGrid">
+            <button class="icon-option" data-icon="weibo_block-normal" title="Block – Original Weibo Colors" id="iconOpt-block-normal">
+              <img src="../src-tauri/icons/weibo_block-normal.png" alt="Block Normal">
+              <span>Original</span>
+            </button>
+            <button class="icon-option" data-icon="weibo_block-dark" title="Block – Dark Monochrome" id="iconOpt-block-dark">
+              <img src="../src-tauri/icons/weibo_block-dark.png" alt="Block Dark">
+              <span>Dark</span>
+            </button>
+            <button class="icon-option" data-icon="weibo_block-white" title="Block – White / Minimal" id="iconOpt-block-white">
+              <img src="../src-tauri/icons/weibo_block-white.png" alt="Block White">
+              <span>White</span>
+            </button>
+            <button class="icon-option" data-icon="weibo_circular-normal" title="Circle – Original Weibo Colors" id="iconOpt-circular-normal">
+              <img src="../src-tauri/icons/weibo_circular-normal.png" alt="Circular Normal">
+              <span>Circle</span>
+            </button>
+            <button class="icon-option" data-icon="weibo_circular-dark" title="Circle – Dark Monochrome" id="iconOpt-circular-dark">
+              <img src="../src-tauri/icons/weibo_circular-dark.png" alt="Circular Dark">
+              <span>Circle Dark</span>
+            </button>
+            <button class="icon-option" data-icon="weibo_circular-white" title="Circle – White / Minimal" id="iconOpt-circular-white">
+              <img src="../src-tauri/icons/weibo_circular-white.png" alt="Circular White">
+              <span>Circle White</span>
+            </button>
+          </div>
+          <p class="icon-selected-label" id="iconSelectedLabel">Selected: <strong>Original</strong></p>
+        </div>
+
         <div class="setting-group">
           <label>🎨 Theme Selection</label>
           <select id="themeSelect" class="setting-input">
