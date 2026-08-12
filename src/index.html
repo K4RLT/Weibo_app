@@ -28,8 +28,8 @@
     </div>
 
     <div class="toolbar-right">
-      <button class="adw-btn" id="btnSettingsToggle" title="Preferences (Ctrl+,)">
-        <span class="material-symbols-rounded">settings</span>
+      <button class="adw-btn" id="btnToggleSidebar" title="Toggle Sidebar">
+        <span class="material-symbols-rounded">menu</span>
       </button>
     </div>
   </header>
@@ -64,6 +64,9 @@
         <button class="side-item side-login" id="sideBtnLogin" title="Login · 登录">
           <span class="material-symbols-rounded">login</span>
         </button>
+        <button class="side-item" id="sideBtnSettings" title="Preferences · 设置">
+          <span class="material-symbols-rounded">settings</span>
+        </button>
       </div>
     </aside>
 
@@ -89,37 +92,38 @@
       </div>
 
       <div class="modal-body">
-        <!-- View Mode -->
-        <div class="setting-group">
-          <label class="setting-label">View Mode</label>
-          <div class="chip-row">
-            <button class="chip chip-login" id="btnLoginMode">SSO Login</button>
-            <button class="chip chip-active" id="btnDesktopMode">Desktop Web</button>
-            <button class="chip" id="btnMobileMode">Mobile Web</button>
-          </div>
-        </div>
 
-        <!-- Zoom -->
+        <!-- App Icon -->
         <div class="setting-group">
-          <label class="setting-label">Zoom Level</label>
-          <div class="zoom-row">
-            <button class="zoom-btn" id="btnZoomOut">
-              <span class="material-symbols-rounded">remove</span>
+          <label class="setting-label">App Icon</label>
+          <p class="setting-note">
+            <span class="material-symbols-rounded" style="font-size:14px;vertical-align:-3px">info</span>
+            Changes apply after restarting the app.
+          </p>
+          <div class="icon-picker">
+            <button class="icon-opt" data-icon="weibo_block-normal" id="iconOpt0">
+              <img src="icons/weibo_block-normal.png" alt="Original">
+              <span>Original</span>
             </button>
-            <span id="zoomLevel" class="zoom-label">100%</span>
-            <button class="zoom-btn" id="btnZoomIn">
-              <span class="material-symbols-rounded">add</span>
+            <button class="icon-opt" data-icon="weibo_block-dark" id="iconOpt1">
+              <img src="icons/weibo_block-dark.png" alt="Block Dark">
+              <span>Dark</span>
             </button>
-          </div>
-        </div>
-
-        <!-- Clean Mode -->
-        <div class="setting-group">
-          <label class="setting-label">Clean Mode</label>
-          <div class="toggle-row">
-            <span class="toggle-desc">Automatically hide promotional ads</span>
-            <button class="toggle-btn active" id="btnCleanUI">
-              <span class="material-symbols-rounded">check</span> On
+            <button class="icon-opt" data-icon="weibo_block-white" id="iconOpt2">
+              <img src="icons/weibo_block-white.png" alt="Block White">
+              <span>White</span>
+            </button>
+            <button class="icon-opt" data-icon="weibo_circular-normal" id="iconOpt3">
+              <img src="icons/weibo_circular-normal.png" alt="Circle">
+              <span>Circle</span>
+            </button>
+            <button class="icon-opt" data-icon="weibo_circular-dark" id="iconOpt4">
+              <img src="icons/weibo_circular-dark.png" alt="Circle Dark">
+              <span>Circle Dark</span>
+            </button>
+            <button class="icon-opt" data-icon="weibo_circular-white" id="iconOpt5">
+              <img src="icons/weibo_circular-white.png" alt="Circle White">
+              <span>Circle White</span>
             </button>
           </div>
         </div>
