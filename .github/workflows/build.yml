@@ -57,8 +57,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__
-          releaseName: 'Weibo Desktop v__VERSION__'
-          releaseBody: 'See the assets below to download Weibo Desktop for your platform.'
-          releaseDraft: true
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          releaseName: 'Weibo Desktop ${{ github.ref_name }}'
+          releaseBody: |
+            ## 微博桌面版 Weibo Desktop ${{ github.ref_name }}
+
+            Unofficial lightweight desktop wrapper for Weibo — built with Tauri.
+
+            ### Download
+            | Platform | File |
+            |---|---|
+            | 🪟 Windows | `.exe` installer or `.msi` |
+            | 🐧 Linux | `.AppImage` (portable) or `.deb` |
+            | 🍎 macOS | `.dmg` |
+
+            > ⚠️ This is an unofficial app, not affiliated with Sina Weibo.
+          releaseDraft: false
           prerelease: false
