@@ -109,6 +109,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // ── Icon Picker ──────────────────────────────────────────────
+  const ICON_LABELS = {
+    'weibo_block-normal':    'Original',
+    'weibo_block-dark':      'Dark',
+    'weibo_block-white':     'White',
+    'weibo_circular-normal': 'Circle',
+    'weibo_circular-dark':   'Circle Dark',
+    'weibo_circular-white':  'Circle White',
+  };
+
+  const iconSelectedLabel = document.getElementById('iconSelectedLabel');
+  const iconOptions = document.querySelectorAll('.icon-option');
+
+  const selectIcon = (iconKey) => {
+    iconOptions.forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.icon === iconKey);
+    });
+    const label = ICON_LABELS[iconKey] || iconKey;
+    if (iconSelectedLabel) {
+      iconSelectedLabel.innerHTML = `Selected: <strong>${label}</strong>`;
+    }
+    localStorage.setItem('weibo_icon', iconKey);
+    // Notify Tauri backend of icon change (no-op in browser webview mode)
+    if (window.__TAURI__) {
+      window.__TAURI__.core.invoke('set_app_icon', { iconKey }).catch(() => {});
+    }
+  };
+
+  // Load saved icon preference on startup
+  const savedIcon = localStorage.getItem('weibo_icon') || 'weibo_block-normal';
+  selectIcon(savedIcon);
+
+  iconOptions.forEach(btn => {
+    btn.addEventListener('click', () => selectIcon(btn.dataset.icon));
+  });
+  // ─────────────────────────────────────────────────────────────
+
   // Multi-Theme Selector
   const applyTheme = (themeName) => {
     document.body.className = '';
