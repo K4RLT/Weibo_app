@@ -324,7 +324,9 @@ html, body {
 }
 
 .modal-card {
-  width: 420px;
+  width: 560px;
+  max-height: 85vh;
+  overflow-y: auto;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -392,4 +394,95 @@ html, body {
   background: var(--hover-bg);
   padding: 2px 6px;
   border-radius: 4px;
+}
+
+/* Icon Picker Grid */
+.setting-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0;
+  opacity: 0.8;
+}
+
+.icon-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.icon-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.icon-option img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 14px;
+  transition: transform 0.2s ease;
+}
+
+.icon-option span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.icon-option:hover {
+  border-color: var(--accent-orange);
+  background: var(--hover-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 130, 0, 0.2);
+}
+
+.icon-option:hover img {
+  transform: scale(1.08);
+}
+
+.icon-option.selected {
+  border-color: var(--accent-red);
+  background: rgba(230, 22, 45, 0.08);
+  box-shadow: 0 0 0 1px rgba(230, 22, 45, 0.4), 0 4px 16px rgba(230, 22, 45, 0.2);
+}
+
+.icon-option.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent-red);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 18px;
+  text-align: center;
+}
+
+.icon-selected-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 4px 0 0 0;
+}
+
+.icon-selected-label strong {
+  color: var(--accent-red);
 }
