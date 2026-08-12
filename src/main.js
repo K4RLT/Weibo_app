@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sidebar Items
   const sideBtnHome = document.getElementById('sideBtnHome');
   const sideBtnHot = document.getElementById('sideBtnHot');
+  const sideBtnVideo = document.getElementById('sideBtnVideo');
   const sideBtnMsg = document.getElementById('sideBtnMsg');
   const sideBtnFav = document.getElementById('sideBtnFav');
   const sideBtnProfile = document.getElementById('sideBtnProfile');
@@ -36,11 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeSelect = document.getElementById('themeSelect');
   const uaSelect = document.getElementById('uaSelect');
 
-  // Constants & State
-  const PASSPORT_LOGIN_URL = 'https://passport.weibo.com/sso/signin?entry=miniblog&source=miniblog&disp=popup&url=https%3A%2F%2Fweibo.com%2Fnewlogin%3Ftabtype%3Dweibo%26gid%3D102803%26openLoginLayer%3D0%26url%3Dhttps%3A%2F%2Fwww.weibo.com%2F&from=weibopro';
+  // Constants & State (Clean Canonical URLs)
+  const PASSPORT_LOGIN_URL = 'https://passport.weibo.com/sso/signin';
   const URLS = {
     home: 'https://weibo.com',
-    hot: 'https://weibo.com/hot/search',
+    hot: 'https://s.weibo.com/top/summary', // Weibo Official Hot Search List
+    video: 'https://weibo.com/tv',           // Weibo Video Feed
     msg: 'https://weibo.com/message',
     fav: 'https://weibo.com/fav',
     profile: 'https://weibo.com/mygroups',
@@ -78,9 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
     iframe.src = iframe.src;
   });
 
-  // Sidebar Quick Nav
+  // Sidebar Quick Nav (Deep Weibo Ecosystem)
   sideBtnHome?.addEventListener('click', () => navigateTo(URLS.home, sideBtnHome));
   sideBtnHot?.addEventListener('click', () => navigateTo(URLS.hot, sideBtnHot));
+  sideBtnVideo?.addEventListener('click', () => navigateTo(URLS.video, sideBtnVideo));
   sideBtnMsg?.addEventListener('click', () => navigateTo(URLS.msg, sideBtnMsg));
   sideBtnFav?.addEventListener('click', () => navigateTo(URLS.fav, sideBtnFav));
   sideBtnProfile?.addEventListener('click', () => navigateTo(URLS.profile, sideBtnProfile));
