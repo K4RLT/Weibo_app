@@ -49,6 +49,9 @@ jobs:
       - name: Install Node dependencies
         run: npm install
 
+      - name: Generate Tauri icons from official Weibo PNG
+        run: npx @tauri-apps/cli icon src-tauri/icons/weibo_block-normal.png
+
       - name: Build Tauri App
         uses: tauri-apps/tauri-action@v0.5
         env:
