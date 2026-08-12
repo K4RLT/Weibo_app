@@ -103,10 +103,18 @@
     <!-- Webview iframe -->
     <main class="content-viewport">
       <iframe id="weiboFrame"
-        src="https://weibo.com"
+        src="https://passport.weibo.com/sso/signin"
         allow="geolocation; microphone; camera; clipboard-read; clipboard-write"
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals">
       </iframe>
+
+      <!-- Compact Login Mode Footer Banner (QQ style) -->
+      <div class="login-footer-bar" id="loginFooterBar">
+        <button class="btn-enter-app" id="btnEnterApp">
+          <span>进入微博主页面 Enter Main Feed</span>
+          <span class="material-symbols-rounded">arrow_forward</span>
+        </button>
+      </div>
     </main>
 
   </div><!-- /app-body -->
