@@ -1,7 +1,11 @@
 // Prevents additional console window on Windows in release
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri::{image::Image, Manager};
+use tauri::{
+    image::Image,
+    webview::{WebviewBuilder, WebviewUrl},
+    Emitter, LogicalPosition, LogicalSize, Manager, Rect,
+};
 
 // Embedded icon bytes at compile time
 static ICON_BLOCK_NORMAL:    &[u8] = include_bytes!("../icons/weibo_block-normal.png");
@@ -34,6 +38,80 @@ fn read_saved_icon_key() -> String {
         .to_string()
 }
 
+struct ChildWebviewState(std::sync::Mutex<bool>);
+
+#[tauri::command]
+fn set_webview_bounds(
+    window: tauri::Window,
+    app_handle: tauri::AppHandle,
+    state: tauri::State<'_, ChildWebviewState>,
+    x: f64,
+    y: f64,
+    width: f64,
+    height: f64,
+) -> Result<(), String> {
+    let mut created = state.0.lock().map_err(|e| e.to_string())?;
+
+    if !*created {
+        let label = "weibo_child";
+        let url_str = "https://www.weibo.com";
+        let url = url::Url::parse(url_str).map_err(|e| e.to_string())?;
+
+        let ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+
+        let app_handle_clone = app_handle.clone();
+        let webview_builder = WebviewBuilder::new(label, WebviewUrl::External(url))
+            .user_agent(ua)
+            .on_navigation(move |url| {
+                let _ = app_handle_clone.emit("weibo-nav", url.as_str());
+                true
+            });
+
+        let position = LogicalPosition::new(x, y);
+        let size = LogicalSize::new(width, height);
+
+        window.add_child(webview_builder, position, size).map_err(|e| e.to_string())?;
+        *created = true;
+    } else {
+        if let Some(webview) = window.get_webview("weibo_child") {
+            let position = LogicalPosition::new(x, y).into();
+            let size = LogicalSize::new(width, height).into();
+            webview.set_bounds(Rect { position, size }).map_err(|e| e.to_string())?;
+        }
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+fn navigate_weibo(app: tauri::AppHandle, url: String) -> Result<(), String> {
+    let parsed_url = url::Url::parse(&url).map_err(|e| e.to_string())?;
+    let webview = app.get_webview("weibo_child").ok_or("Webview not found")?;
+    webview.navigate(parsed_url).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn reload_weibo(app: tauri::AppHandle) -> Result<(), String> {
+    let webview = app.get_webview("weibo_child").ok_or("Webview not found")?;
+    webview.eval("location.reload()").map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn back_weibo(app: tauri::AppHandle) -> Result<(), String> {
+    let webview = app.get_webview("weibo_child").ok_or("Webview not found")?;
+    webview.eval("history.back()").map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn forward_weibo(app: tauri::AppHandle) -> Result<(), String> {
+    let webview = app.get_webview("weibo_child").ok_or("Webview not found")?;
+    webview.eval("history.forward()").map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 /// JS-callable command: saves icon key to config file so it
 /// persists across reboots. The window icon is updated immediately too.
 #[tauri::command]
@@ -56,7 +134,15 @@ fn main() {
     let saved_key = read_saved_icon_key();
 
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![set_app_icon])
+        .manage(ChildWebviewState(std::sync::Mutex::new(false)))
+        .invoke_handler(tauri::generate_handler![
+            set_app_icon,
+            set_webview_bounds,
+            navigate_weibo,
+            reload_weibo,
+            back_weibo,
+            forward_weibo
+        ])
         .setup(move |app| {
             // Apply saved icon on startup
             if let Some(window) = app.get_webview_window("main") {

@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // ── Elements ─────────────────────────────────────────────────
-  const iframe             = document.getElementById('weiboFrame');
+  const contentViewport    = document.getElementById('contentViewport');
   const settingsModal      = document.getElementById('settingsModal');
   const btnCloseSettings   = document.getElementById('btnCloseSettings');
   const btnToggleSidebar   = document.getElementById('btnToggleSidebar');
@@ -22,6 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnBack            = document.getElementById('btnBack');
   const btnForward         = document.getElementById('btnForward');
   const btnReload          = document.getElementById('btnReload');
+
+  // ── Tauri IPC Helper ────────────────────────────────────────
+  const invokeTauri = async (cmd, args = {}) => {
+    if (window.__TAURI__?.core?.invoke) {
+      try {
+        return await window.__TAURI__.core.invoke(cmd, args);
+      } catch (err) {
+        console.error(`Failed to invoke ${cmd}:`, err);
+      }
+    }
+  };
 
   // ── URLs ────────────────────────────────────────────────────
   // NOTE: Use www.weibo.com — bare weibo.com redirects through a
@@ -53,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Navigation ──────────────────────────────────────────────
   const navigateTo = (url, nextBtn = null) => {
-    iframe.src = url;
+    invokeTauri('navigate_weibo', { url });
     wasOnLoginPage = isLoginUrl(url);
     updateLoginBtn(url);
 
@@ -64,10 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // After login completes → redirect to home feed automatically
-  iframe?.addEventListener('load', () => {
-    try {
-      const url = iframe.contentWindow?.location.href || iframe.src;
+  // Listen for the 'weibo-nav' event from Rust
+  if (window.__TAURI__?.event?.listen) {
+    window.__TAURI__.event.listen('weibo-nav', (event) => {
+      const url = event.payload;
+      console.log('weibo-nav event received, url:', url);
+      
       if (wasOnLoginPage && !isLoginUrl(url)) {
         wasOnLoginPage = false;
         navigateTo(URLS.home, sideBtnHome);
@@ -75,27 +88,35 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       wasOnLoginPage = isLoginUrl(url);
       updateLoginBtn(url);
-    } catch (_) {
-      // Cross-origin: if we were on login, assume redirect = login done
-      if (wasOnLoginPage) {
-        wasOnLoginPage = false;
-        navigateTo(URLS.home, sideBtnHome);
-      }
-    }
-  });
+    });
+  }
 
   const reloadFrame = () => {
-    try { iframe.contentWindow?.location.reload(); }
-    catch (_) {
-      const s = iframe.src;
-      iframe.src = '';
-      requestAnimationFrame(() => { iframe.src = s; });
-    }
+    invokeTauri('reload_weibo');
   };
 
+  // ── Resize Observer for Child Webview ──────────────────────
+  const updateWebviewBounds = () => {
+    if (!contentViewport) return;
+    const rect = contentViewport.getBoundingClientRect();
+    invokeTauri('set_webview_bounds', {
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height
+    });
+  };
+
+  if (contentViewport) {
+    const observer = new ResizeObserver(() => {
+      updateWebviewBounds();
+    });
+    observer.observe(contentViewport);
+  }
+
   // Toolbar buttons
-  btnBack?.addEventListener('click',    () => { try { iframe.contentWindow?.history.back();    } catch (_) {} });
-  btnForward?.addEventListener('click', () => { try { iframe.contentWindow?.history.forward(); } catch (_) {} });
+  btnBack?.addEventListener('click',    () => { invokeTauri('back_weibo'); });
+  btnForward?.addEventListener('click', () => { invokeTauri('forward_weibo'); });
   btnReload?.addEventListener('click',  reloadFrame);
 
   // Sidebar buttons
