@@ -13,14 +13,15 @@
     },
     "windows": [
       {
-        "title": "Weibo Desktop (新浪微博)",
+        "title": "Weibo Desktop · 微博桌面版",
         "width": 1280,
         "height": 840,
+        "minWidth": 900,
+        "minHeight": 600,
         "resizable": true,
         "fullscreen": false,
         "center": true,
-        "decorations": true,
-        "transparent": false
+        "decorations": false
       }
     ]
   },
