@@ -117,6 +117,18 @@ html, body {
   color: var(--adw-text);
 }
 
+.win-ctrl {
+  width: 24px;
+  height: 24px;
+  border-radius: 50% !important;
+  margin-left: 4px;
+}
+
+.win-ctrl#winClose:hover {
+  background: #e01b24 !important;
+  color: #ffffff !important;
+}
+
 /* ═══ Main View ══════════════════════════════════════════════ */
 .app-body {
   display: flex;

@@ -12,7 +12,7 @@
 <body class="adw-dark">
 
   <!-- ═══ Navigation Toolbar (Adwaita Style) ═════════════════════ -->
-  <header class="adw-toolbar">
+  <header class="adw-toolbar" data-tauri-drag-region>
     <div class="toolbar-left">
       <button class="adw-btn" id="btnToggleSidebar" title="Toggle Sidebar" style="margin-right: 4px;">
         <span class="material-symbols-rounded">menu</span>
@@ -31,6 +31,15 @@
     </div>
 
     <div class="toolbar-right">
+      <button class="adw-btn win-ctrl" id="winMin" title="Minimize">
+        <span class="material-symbols-rounded" style="font-size: 16px;">minimize</span>
+      </button>
+      <button class="adw-btn win-ctrl" id="winMax" title="Maximize">
+        <span class="material-symbols-rounded" style="font-size: 16px;">crop_square</span>
+      </button>
+      <button class="adw-btn win-ctrl" id="winClose" title="Close">
+        <span class="material-symbols-rounded" style="font-size: 16px;">close</span>
+      </button>
     </div>
   </header>
 

@@ -192,4 +192,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.ctrlKey && e.key.toLowerCase() === 'l')       { e.preventDefault(); navigateTo(URLS.login, sideBtnLogin); }
     if (e.ctrlKey && e.key === ',')                     { e.preventDefault(); openSettings(); }
   });
+
+  // ── Window Controls (for frameless integration) ─────────────
+  const winMin   = document.getElementById('winMin');
+  const winMax   = document.getElementById('winMax');
+  const winClose = document.getElementById('winClose');
+
+  if (window.__TAURI__?.window?.getCurrentWindow) {
+    const appWindow = window.__TAURI__.window.getCurrentWindow();
+    winMin?.addEventListener('click',   () => appWindow.minimize());
+    winMax?.addEventListener('click',   async () => {
+      if (await appWindow.isMaximized()) {
+        appWindow.unmaximize();
+      } else {
+        appWindow.maximize();
+      }
+    });
+    winClose?.addEventListener('click', () => appWindow.close());
+  }
 });
