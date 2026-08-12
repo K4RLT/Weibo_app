@@ -204,9 +204,51 @@ html, body {
 }
 
 /* ═══ Sidebar ════════════════════════════════════════════════ */
-/* Hide sidebar when on login page (QQ style) */
+/* Hide sidebar and show footer bar when on login page (QQ style compact window) */
 body.is-login-page .app-sidebar {
   display: none !important;
+}
+
+body.is-login-page .login-footer-bar {
+  display: flex !important;
+}
+
+.login-footer-bar {
+  display: none;
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  background: var(--bg-modal);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: var(--radius-l);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.btn-enter-app {
+  border: none;
+  background: var(--accent-grad);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: var(--radius-l);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform var(--t) var(--ease), box-shadow var(--t) var(--ease);
+}
+
+.btn-enter-app:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(230,22,45,0.4);
+}
+
+.btn-enter-app .material-symbols-rounded {
+  font-size: 16px;
 }
 
 .app-sidebar {
