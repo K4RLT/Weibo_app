@@ -4,8 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const iframe             = document.getElementById('weiboFrame');
   const settingsModal      = document.getElementById('settingsModal');
   const btnCloseSettings   = document.getElementById('btnCloseSettings');
-  const sideBtnSettings    = document.getElementById('sideBtnSettings');
-  const btnSettingsToggle  = document.getElementById('btnSettingsToggle');
+  const btnToggleSidebar   = document.getElementById('btnToggleSidebar');
+  const appSidebar         = document.getElementById('appSidebar');
+  const themeChips         = document.querySelectorAll('[data-theme]');
 
   // Sidebar nav
   const sideBtnHome        = document.getElementById('sideBtnHome');
@@ -15,25 +16,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const sideBtnFav         = document.getElementById('sideBtnFav');
   const sideBtnProfile     = document.getElementById('sideBtnProfile');
   const sideBtnLogin       = document.getElementById('sideBtnLogin');
+  const sideBtnSettings    = document.getElementById('sideBtnSettings');
 
-  // Header nav
+  // Toolbar nav
   const btnBack            = document.getElementById('btnBack');
   const btnForward         = document.getElementById('btnForward');
   const btnReload          = document.getElementById('btnReload');
 
-  // Settings controls
-  const btnLoginMode       = document.getElementById('btnLoginMode');
-  const btnDesktopMode     = document.getElementById('btnDesktopMode');
-  const btnMobileMode      = document.getElementById('btnMobileMode');
-  const btnZoomIn          = document.getElementById('btnZoomIn');
-  const btnZoomOut         = document.getElementById('btnZoomOut');
-  const zoomLabel          = document.getElementById('zoomLevel');
-  const btnCleanUI         = document.getElementById('btnCleanUI');
-  const themeChips         = document.querySelectorAll('[data-theme]');
-
   // ── URLs ────────────────────────────────────────────────────
+  // NOTE: Use www.weibo.com — bare weibo.com redirects through a
+  // visitor-challenge JS page that blocks iframe loading.
   const URLS = {
-    home:    'https://weibo.com',
+    home:    'https://www.weibo.com',
     hot:     'https://s.weibo.com/top/summary',
     video:   'https://weibo.com/tv',
     msg:     'https://weibo.com/message',
@@ -44,26 +38,24 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ── State ───────────────────────────────────────────────────
-  const ZOOM_MIN = 7, ZOOM_MAX = 15;
-  let zoomSteps   = parseInt(localStorage.getItem('weibo_zoom') || '10', 10);
-  let isCleanMode = true;
   let activeSideBtn = sideBtnHome;
-
-  // ── Navigation ──────────────────────────────────────────────
   let wasOnLoginPage = true;
 
-  const updateLoginButtonVisibility = (url) => {
-    const isLoginPage = url === URLS.login || url.includes('passport') || url.includes('signin');
+  // ── Login button visibility ─────────────────────────────────
+  const isLoginUrl = (url) =>
+    url.includes('passport') || url.includes('signin');
+
+  const updateLoginBtn = (url) => {
     if (sideBtnLogin) {
-      sideBtnLogin.style.display = isLoginPage ? 'flex' : 'none';
+      sideBtnLogin.style.display = isLoginUrl(url) ? 'flex' : 'none';
     }
   };
 
+  // ── Navigation ──────────────────────────────────────────────
   const navigateTo = (url, nextBtn = null) => {
     iframe.src = url;
-    const isLoginPage = url === URLS.login || url.includes('passport') || url.includes('signin');
-    wasOnLoginPage = isLoginPage;
-    updateLoginButtonVisibility(url);
+    wasOnLoginPage = isLoginUrl(url);
+    updateLoginBtn(url);
 
     if (nextBtn && nextBtn !== activeSideBtn) {
       activeSideBtn?.classList.remove('active');
@@ -72,22 +64,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // After login completes → redirect to home feed automatically
   iframe?.addEventListener('load', () => {
     try {
-      const currentUrl = iframe.contentWindow?.location.href || iframe.src;
-      const isLoginPage = currentUrl.includes('passport') || currentUrl.includes('signin');
-
-      // Post-login redirect: If login was in progress and now completed, automatically go to home feed!
-      if (wasOnLoginPage && !isLoginPage) {
+      const url = iframe.contentWindow?.location.href || iframe.src;
+      if (wasOnLoginPage && !isLoginUrl(url)) {
         wasOnLoginPage = false;
         navigateTo(URLS.home, sideBtnHome);
         return;
       }
-
-      wasOnLoginPage = isLoginPage;
-      updateLoginButtonVisibility(currentUrl);
+      wasOnLoginPage = isLoginUrl(url);
+      updateLoginBtn(url);
     } catch (_) {
-      // Cross-origin redirect after SSO login
+      // Cross-origin: if we were on login, assume redirect = login done
       if (wasOnLoginPage) {
         wasOnLoginPage = false;
         navigateTo(URLS.home, sideBtnHome);
@@ -98,15 +87,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const reloadFrame = () => {
     try { iframe.contentWindow?.location.reload(); }
     catch (_) {
-      const s = iframe.src; iframe.src = '';
+      const s = iframe.src;
+      iframe.src = '';
       requestAnimationFrame(() => { iframe.src = s; });
     }
   };
 
+  // Toolbar buttons
   btnBack?.addEventListener('click',    () => { try { iframe.contentWindow?.history.back();    } catch (_) {} });
   btnForward?.addEventListener('click', () => { try { iframe.contentWindow?.history.forward(); } catch (_) {} });
   btnReload?.addEventListener('click',  reloadFrame);
 
+  // Sidebar buttons
   sideBtnHome?.addEventListener('click',    () => navigateTo(URLS.home,    sideBtnHome));
   sideBtnHot?.addEventListener('click',     () => navigateTo(URLS.hot,     sideBtnHot));
   sideBtnVideo?.addEventListener('click',   () => navigateTo(URLS.video,   sideBtnVideo));
@@ -115,18 +107,21 @@ document.addEventListener('DOMContentLoaded', () => {
   sideBtnProfile?.addEventListener('click', () => navigateTo(URLS.profile, sideBtnProfile));
   sideBtnLogin?.addEventListener('click',   () => navigateTo(URLS.login,   sideBtnLogin));
 
-  btnLoginMode?.addEventListener('click',   () => { navigateTo(URLS.login,  sideBtnLogin);   closeSettings(); });
-  btnDesktopMode?.addEventListener('click', () => { navigateTo(URLS.home,   sideBtnHome);    closeSettings(); });
-  btnMobileMode?.addEventListener('click',  () => { navigateTo(URLS.mobile);                 closeSettings(); });
-
   // ── Settings Modal ──────────────────────────────────────────
   const openSettings  = () => settingsModal?.classList.add('open');
   const closeSettings = () => settingsModal?.classList.remove('open');
 
   sideBtnSettings?.addEventListener('click', openSettings);
-  btnSettingsToggle?.addEventListener('click', openSettings);
   btnCloseSettings?.addEventListener('click', closeSettings);
   settingsModal?.addEventListener('click', (e) => { if (e.target === settingsModal) closeSettings(); });
+
+  // ── Sidebar Toggle (burger menu) ────────────────────────────
+  btnToggleSidebar?.addEventListener('click', () => {
+    if (appSidebar) {
+      const hidden = appSidebar.style.display === 'none';
+      appSidebar.style.display = hidden ? 'flex' : 'none';
+    }
+  });
 
   // ── Theme ───────────────────────────────────────────────────
   const applyTheme = (theme) => {
@@ -142,29 +137,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   applyTheme(localStorage.getItem('weibo_theme') || 'dark');
 
-  // ── Zoom ────────────────────────────────────────────────────
-  const updateZoom = () => {
-    const pct = zoomSteps * 10;
-    zoomLabel.textContent = `${pct}%`;
-    iframe.style.transform  = `scale(${zoomSteps / 10})`;
-    iframe.style.width      = `${1000 / zoomSteps}%`;
-    iframe.style.height     = `${1000 / zoomSteps}%`;
-    iframe.style.transformOrigin = 'top left';
-    localStorage.setItem('weibo_zoom', zoomSteps);
+  // ── App Icon Picker ──────────────────────────────────────────
+  const iconOpts = document.querySelectorAll('.icon-opt');
+
+  const selectIcon = (key) => {
+    iconOpts.forEach(btn => btn.classList.toggle('selected', btn.dataset.icon === key));
+    localStorage.setItem('weibo_icon', key);
+    // Tell Rust to persist and apply the icon
+    if (window.__TAURI__?.core?.invoke) {
+      window.__TAURI__.core.invoke('set_app_icon', { iconKey: key }).catch(() => {});
+    }
   };
 
-  zoomSteps = parseInt(localStorage.getItem('weibo_zoom') || '10', 10);
-  updateZoom();
-
-  btnZoomIn?.addEventListener('click',  () => { if (zoomSteps < ZOOM_MAX) { zoomSteps++; updateZoom(); } });
-  btnZoomOut?.addEventListener('click', () => { if (zoomSteps > ZOOM_MIN) { zoomSteps--; updateZoom(); } });
-
-  // ── Clean Mode ──────────────────────────────────────────────
-  btnCleanUI?.addEventListener('click', () => {
-    isCleanMode = !isCleanMode;
-    btnCleanUI.classList.toggle('active', isCleanMode);
-    btnCleanUI.lastChild.textContent = isCleanMode ? ' On' : ' Off';
+  iconOpts.forEach(btn => {
+    btn.addEventListener('click', () => selectIcon(btn.dataset.icon));
   });
+
+  // Restore saved icon selection highlight on load
+  const savedIcon = localStorage.getItem('weibo_icon') || 'weibo_block-normal';
+  iconOpts.forEach(btn => btn.classList.toggle('selected', btn.dataset.icon === savedIcon));
 
   // ── Keyboard Shortcuts ───────────────────────────────────────
   window.addEventListener('keydown', (e) => {
@@ -172,7 +163,5 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.ctrlKey && e.key.toLowerCase() === 'h')       { e.preventDefault(); navigateTo(URLS.home,  sideBtnHome); }
     if (e.ctrlKey && e.key.toLowerCase() === 'l')       { e.preventDefault(); navigateTo(URLS.login, sideBtnLogin); }
     if (e.ctrlKey && e.key === ',')                     { e.preventDefault(); openSettings(); }
-    if (e.ctrlKey && (e.key === '=' || e.key === '+'))  { e.preventDefault(); if (zoomSteps < ZOOM_MAX) { zoomSteps++; updateZoom(); } }
-    if (e.ctrlKey && e.key === '-')                     { e.preventDefault(); if (zoomSteps > ZOOM_MIN) { zoomSteps--; updateZoom(); } }
   });
 });
