@@ -1,0 +1,201 @@
+/* Custom Design System for Weibo Desktop */
+:root {
+  --bg-primary: #0f1117;
+  --bg-secondary: #1a1d27;
+  --bg-header: rgba(26, 29, 39, 0.85);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-primary: #f0f2f5;
+  --text-secondary: #9a9ea9;
+  --accent-orange: #ff8200;
+  --accent-red: #e6162d;
+  --accent-gradient: linear-gradient(135deg, #ff8200, #e6162d);
+  --hover-bg: rgba(255, 255, 255, 0.06);
+  --active-bg: rgba(255, 130, 0, 0.15);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 20px;
+  --header-height: 48px;
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.light-theme {
+  --bg-primary: #f4f5f8;
+  --bg-secondary: #ffffff;
+  --bg-header: rgba(255, 255, 255, 0.9);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --text-primary: #1c1e21;
+  --text-secondary: #65676b;
+  --hover-bg: rgba(0, 0, 0, 0.04);
+  --active-bg: rgba(255, 130, 0, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Header Bar */
+.app-header {
+  height: var(--header-height);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  background: var(--bg-header);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 100;
+}
+
+.header-left, .header-center, .header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 6px;
+}
+
+.brand-logo {
+  width: 26px;
+  height: 26px;
+}
+
+.brand-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.2px;
+}
+
+/* Nav Controls */
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-btn, .tool-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.nav-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.nav-btn:hover, .tool-btn:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+/* Mode Switch Group */
+.mode-switch-group {
+  display: flex;
+  background: var(--hover-bg);
+  padding: 3px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.mode-chip {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 4px 12px;
+  border-radius: var(--radius-lg);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.mode-chip.login-chip {
+  background: rgba(255, 130, 0, 0.12);
+  color: var(--accent-orange);
+  border: 1px solid rgba(255, 130, 0, 0.25);
+}
+
+.mode-chip.login-chip:hover {
+  background: rgba(255, 130, 0, 0.22);
+}
+
+.mode-chip.active {
+  background: var(--accent-gradient);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(230, 22, 45, 0.3);
+  border-color: transparent;
+}
+
+/* Header Right */
+.zoom-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 36px;
+  text-align: center;
+}
+
+.divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border-color);
+  margin: 0 4px;
+}
+
+.tool-btn.active-toggle {
+  width: auto;
+  padding: 0 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--active-bg);
+  color: var(--accent-orange);
+  border: 1px solid rgba(255, 130, 0, 0.3);
+  border-radius: var(--radius-md);
+}
+
+/* Content Viewport */
+.content-viewport {
+  width: 100vw;
+  height: calc(100vh - var(--header-height));
+  position: relative;
+  background-color: var(--bg-primary);
+}
+
+#weiboFrame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #ffffff;
+  transition: transform 0.2s ease;
+  transform-origin: top center;
+}
