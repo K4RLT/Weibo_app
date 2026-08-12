@@ -3,223 +3,254 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weibo Desktop (新浪微博)</title>
+  <title>Weibo Desktop · 微博桌面版</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Inter for text, Material Symbols Rounded for all icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
 </head>
 <body class="dark-theme">
-  <div class="app-container">
-    <!-- App Left Sidebar Dock -->
+
+  <!-- ═══ Custom Titlebar ═══════════════════════════════════════ -->
+  <header class="titlebar" id="titlebar" data-tauri-drag-region>
+    <div class="titlebar-left" data-tauri-drag-region>
+      <img id="titlebarBrandIcon" class="titlebar-appicon" src="icons/weibo_circular-white.png" alt="">
+      <span class="titlebar-title" data-tauri-drag-region>微博桌面版</span>
+    </div>
+
+    <!-- Back / Forward / Reload live in titlebar — no separate header bar -->
+    <div class="titlebar-nav" data-tauri-drag-region="false">
+      <button class="tbar-btn" id="btnBack" title="Back (Alt+←)">
+        <span class="material-symbols-rounded">arrow_back</span>
+      </button>
+      <button class="tbar-btn" id="btnForward" title="Forward (Alt+→)">
+        <span class="material-symbols-rounded">arrow_forward</span>
+      </button>
+      <button class="tbar-btn" id="btnReload" title="Reload (Ctrl+R)">
+        <span class="material-symbols-rounded">refresh</span>
+      </button>
+    </div>
+
+    <!-- Window Controls & Menu -->
+    <div class="titlebar-winctrl">
+      <button class="winbtn" id="btnTitlebarMenu" title="Menu / Settings">
+        <span class="material-symbols-rounded">menu</span>
+      </button>
+      <button class="winbtn winbtn-min" id="btnMinimize" title="Minimize">
+        <span class="material-symbols-rounded">remove</span>
+      </button>
+      <button class="winbtn winbtn-max" id="btnMaximize" title="Maximize">
+        <span class="material-symbols-rounded">crop_square</span>
+      </button>
+      <button class="winbtn winbtn-close" id="btnClose" title="Close">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ Main Layout ═══════════════════════════════════════════ -->
+  <div class="app-body">
+
+    <!-- Sidebar dock — always visible, QQ-style thin strip -->
     <aside class="app-sidebar" id="appSidebar">
       <div class="sidebar-top">
-        <div class="brand-badge" title="Weibo Desktop App">
-          <svg class="brand-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM17.15 15.65C16.92 16.32 16.03 16.8 15.02 16.85C14.01 16.9 13.06 16.5 12.82 15.83C12.58 15.16 13.14 14.47 14.15 14.42C15.16 14.37 16.92 14.98 17.15 15.65ZM18.81 12.31C18.42 13.67 16.86 14.77 14.92 14.96C12.98 15.15 11.23 14.37 11.62 13.01C12.01 11.65 13.57 10.55 15.51 10.36C17.45 10.17 19.2 10.95 18.81 12.31ZM17.38 7.42C18.17 7.74 18.73 8.35 18.91 9.15C19.09 9.95 18.86 10.82 18.3 11.45C17.74 12.08 16.94 12.37 16.15 12.05C15.36 11.73 14.8 11.12 14.62 10.32C14.44 9.52 14.67 8.65 15.23 8.02C15.79 7.39 16.59 7.1 17.38 7.42Z" fill="url(#weibo-grad-side)"/>
-            <defs>
-              <linearGradient id="weibo-grad-side" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#FF8200"/>
-                <stop offset="1" stop-color="#E6162D"/>
-              </linearGradient>
-            </defs>
-          </svg>
+        <!-- Brand logo — switches with theme -->
+        <div class="brand-badge">
+          <img id="sidebarBrandIcon" class="brand-img" src="icons/weibo_circular-white.png" alt="Weibo">
         </div>
 
         <nav class="sidebar-nav">
-          <button class="side-item active" id="sideBtnHome" title="Feed / Timeline (首页)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <button class="side-item active" id="sideBtnHome" title="Feed · 首页">
+            <span class="material-symbols-rounded">home</span>
             <span class="side-label">Feed</span>
           </button>
-
-          <button class="side-item" id="sideBtnHot" title="Hot Search Rankings (微博热搜)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            <span class="side-label">Hot Search</span>
+          <button class="side-item" id="sideBtnHot" title="Hot Search · 微博热搜">
+            <span class="material-symbols-rounded">local_fire_department</span>
+            <span class="side-label">Hot</span>
           </button>
-
-          <button class="side-item" id="sideBtnVideo" title="Weibo Video (微博视频)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          <button class="side-item" id="sideBtnVideo" title="Video · 微博视频">
+            <span class="material-symbols-rounded">play_circle</span>
             <span class="side-label">Video</span>
           </button>
-
-          <button class="side-item" id="sideBtnMsg" title="Message Center (消息中心)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <button class="side-item" id="sideBtnMsg" title="Messages · 消息">
+            <span class="material-symbols-rounded">chat_bubble</span>
             <span class="side-label">Messages</span>
           </button>
-
-          <button class="side-item" id="sideBtnFav" title="Bookmarks & Favorites (我的收藏)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+          <button class="side-item" id="sideBtnFav" title="Favorites · 我的收藏">
+            <span class="material-symbols-rounded">bookmark</span>
             <span class="side-label">Favs</span>
           </button>
-
-          <button class="side-item" id="sideBtnProfile" title="Personal Profile (个人主页)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <button class="side-item" id="sideBtnProfile" title="Profile · 个人主页">
+            <span class="material-symbols-rounded">person</span>
             <span class="side-label">Profile</span>
-          </button>
-
-          <div class="sidebar-divider"></div>
-
-          <button class="side-item login-highlight" id="sideBtnLogin" title="Passport SSO Login (账号登录)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            <span class="side-label">Login</span>
           </button>
         </nav>
       </div>
 
       <div class="sidebar-bottom">
-        <button class="side-item" id="sideBtnSettings" title="App Settings (设置)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <button class="side-item side-login" id="sideBtnLogin" title="Login · 登录">
+          <span class="material-symbols-rounded">login</span>
+          <span class="side-label">Login</span>
+        </button>
+        <button class="side-item" id="sideBtnSettings" title="Settings · 设置">
+          <span class="material-symbols-rounded">settings</span>
           <span class="side-label">Settings</span>
         </button>
       </div>
     </aside>
 
-    <!-- Main Content Body -->
-    <div class="main-wrapper">
-      <!-- App Header Toolbar -->
-      <header class="app-header">
-        <div class="header-left">
-          <button id="btnToggleSidebar" class="nav-btn" title="Toggle Sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
+    <!-- Webview iframe -->
+    <main class="content-viewport">
+      <iframe id="weiboFrame"
+        src="https://weibo.com"
+        allow="geolocation; microphone; camera; clipboard-read; clipboard-write"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals">
+      </iframe>
+    </main>
 
-          <div class="nav-controls">
-            <button id="btnBack" class="nav-btn" title="Back (Alt+Left)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            </button>
-            <button id="btnForward" class="nav-btn" title="Forward (Alt+Right)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button id="btnReload" class="nav-btn" title="Reload (Ctrl+R / F5)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-            </button>
-          </div>
-        </div>
+  </div><!-- /app-body -->
 
-        <div class="header-center">
-          <div class="mode-switch-group">
-            <button id="btnLoginMode" class="mode-chip login-chip">
-              🔑 SSO Login
-            </button>
-            <button id="btnDesktopMode" class="mode-chip active">
-              🌐 Desktop Web
-            </button>
-            <button id="btnMobileMode" class="mode-chip">
-              📱 Mobile Web
-            </button>
-          </div>
-        </div>
-
-        <div class="header-right">
-          <button id="btnZoomOut" class="tool-btn" title="Zoom Out (Ctrl+Minus)">A-</button>
-          <span id="zoomLevel" class="zoom-label">100%</span>
-          <button id="btnZoomIn" class="tool-btn" title="Zoom In (Ctrl+Plus)">A+</button>
-
-          <div class="divider"></div>
-
-          <button id="btnCleanUI" class="tool-btn active-toggle" title="Toggle Clean Mode (Hide Banners & Sidebar Ads)">
-            ✨ Clean Mode
-          </button>
-
-          <button id="btnThemeToggle" class="tool-btn icon-only" title="Toggle Dark/Light Theme">
-            🌙
-          </button>
-        </div>
-      </header>
-
-      <!-- Webview Viewport Frame -->
-      <main class="content-viewport" id="viewport">
-        <iframe id="weiboFrame" src="https://weibo.com" allow="geolocation; microphone; camera; clipboard-read; clipboard-write" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
-      </main>
-    </div>
-  </div>
-
-  <!-- Settings Modal Drawer -->
+  <!-- ═══ Settings Drawer ═══════════════════════════════════════ -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>⚙️ App Preferences</h3>
-        <button id="btnCloseSettings" class="modal-close">&times;</button>
+        <span class="material-symbols-rounded modal-hdr-icon">settings</span>
+        <h3>App Preferences</h3>
+        <button class="modal-close" id="btnCloseSettings">
+          <span class="material-symbols-rounded">close</span>
+        </button>
       </div>
+
       <div class="modal-body">
 
-        <!-- App Icon Picker -->
+        <!-- View Mode (was in top bar) -->
         <div class="setting-group">
-          <label>🖼️ App Icon Style</label>
-          <p class="setting-desc">Choose your preferred dock &amp; taskbar icon. Takes effect on next launch.</p>
+          <label class="setting-label">
+            <span class="material-symbols-rounded">language</span>
+            View Mode
+          </label>
+          <div class="chip-row">
+            <button class="chip chip-login" id="btnLoginMode">
+              <span class="material-symbols-rounded">lock</span> SSO Login
+            </button>
+            <button class="chip chip-active" id="btnDesktopMode">
+              <span class="material-symbols-rounded">computer</span> Desktop
+            </button>
+            <button class="chip" id="btnMobileMode">
+              <span class="material-symbols-rounded">smartphone</span> Mobile
+            </button>
+          </div>
+        </div>
+
+        <!-- Zoom (was in top bar) -->
+        <div class="setting-group">
+          <label class="setting-label">
+            <span class="material-symbols-rounded">zoom_in</span>
+            Zoom Level
+          </label>
+          <div class="zoom-row">
+            <button class="zoom-btn" id="btnZoomOut">
+              <span class="material-symbols-rounded">remove</span>
+            </button>
+            <span id="zoomLevel" class="zoom-label">100%</span>
+            <button class="zoom-btn" id="btnZoomIn">
+              <span class="material-symbols-rounded">add</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Clean Mode (was in top bar) -->
+        <div class="setting-group">
+          <label class="setting-label">
+            <span class="material-symbols-rounded">auto_fix_high</span>
+            Clean Mode
+          </label>
+          <div class="toggle-row">
+            <span class="toggle-desc">Hide ads &amp; sidebar recommendations</span>
+            <button class="toggle-btn active" id="btnCleanUI">
+              <span class="material-symbols-rounded">check</span>
+              On
+            </button>
+          </div>
+        </div>
+
+        <!-- Theme -->
+        <div class="setting-group">
+          <label class="setting-label">
+            <span class="material-symbols-rounded">palette</span>
+            Theme
+          </label>
+          <div class="chip-row">
+            <button class="chip chip-active" data-theme="dark" id="themeChipDark">
+              <span class="material-symbols-rounded">dark_mode</span> Dark
+            </button>
+            <button class="chip" data-theme="light" id="themeChipLight">
+              <span class="material-symbols-rounded">light_mode</span> Light
+            </button>
+            <button class="chip" data-theme="oled" id="themeChipOled">
+              <span class="material-symbols-rounded">brightness_empty</span> AMOLED
+            </button>
+            <button class="chip" data-theme="orange" id="themeChipOrange">
+              <span class="material-symbols-rounded">wb_sunny</span> Weibo Orange
+            </button>
+          </div>
+        </div>
+
+        <!-- App Icon -->
+        <div class="setting-group">
+          <label class="setting-label">
+            <span class="material-symbols-rounded">apps</span>
+            App Icon Style
+          </label>
+          <p class="setting-desc">Applies on next launch.</p>
           <div class="icon-picker-grid" id="iconPickerGrid">
-            <button class="icon-option" data-icon="weibo_block-normal" title="Block – Original Weibo Colors" id="iconOpt-block-normal">
-              <img src="../src-tauri/icons/weibo_block-normal.png" alt="Block Normal">
+            <button class="icon-option" data-icon="weibo_block-normal" id="iconOpt-block-normal">
+              <img src="icons/weibo_block-normal.png" alt="Block Original">
               <span>Original</span>
             </button>
-            <button class="icon-option" data-icon="weibo_block-dark" title="Block – Dark Monochrome" id="iconOpt-block-dark">
-              <img src="../src-tauri/icons/weibo_block-dark.png" alt="Block Dark">
+            <button class="icon-option" data-icon="weibo_block-dark" id="iconOpt-block-dark">
+              <img src="icons/weibo_block-dark.png" alt="Block Dark">
               <span>Dark</span>
             </button>
-            <button class="icon-option" data-icon="weibo_block-white" title="Block – White / Minimal" id="iconOpt-block-white">
-              <img src="../src-tauri/icons/weibo_block-white.png" alt="Block White">
+            <button class="icon-option" data-icon="weibo_block-white" id="iconOpt-block-white">
+              <img src="icons/weibo_block-white.png" alt="Block White">
               <span>White</span>
             </button>
-            <button class="icon-option" data-icon="weibo_circular-normal" title="Circle – Original Weibo Colors" id="iconOpt-circular-normal">
-              <img src="../src-tauri/icons/weibo_circular-normal.png" alt="Circular Normal">
+            <button class="icon-option" data-icon="weibo_circular-normal" id="iconOpt-circular-normal">
+              <img src="icons/weibo_circular-normal.png" alt="Circle Original">
               <span>Circle</span>
             </button>
-            <button class="icon-option" data-icon="weibo_circular-dark" title="Circle – Dark Monochrome" id="iconOpt-circular-dark">
-              <img src="../src-tauri/icons/weibo_circular-dark.png" alt="Circular Dark">
+            <button class="icon-option" data-icon="weibo_circular-dark" id="iconOpt-circular-dark">
+              <img src="icons/weibo_circular-dark.png" alt="Circle Dark">
               <span>Circle Dark</span>
             </button>
-            <button class="icon-option" data-icon="weibo_circular-white" title="Circle – White / Minimal" id="iconOpt-circular-white">
-              <img src="../src-tauri/icons/weibo_circular-white.png" alt="Circular White">
+            <button class="icon-option" data-icon="weibo_circular-white" id="iconOpt-circular-white">
+              <img src="icons/weibo_circular-white.png" alt="Circle White">
               <span>Circle White</span>
             </button>
           </div>
           <p class="icon-selected-label" id="iconSelectedLabel">Selected: <strong>Original</strong></p>
         </div>
 
+        <!-- Keyboard Shortcuts -->
         <div class="setting-group">
-          <label>🎨 Theme Selection</label>
-          <select id="themeSelect" class="setting-input">
-            <option value="dark">Dark Theme (Default)</option>
-            <option value="light">Light Clean Theme</option>
-            <option value="oled">AMOLED Pitch Black</option>
-            <option value="orange">Weibo Signature Orange</option>
-          </select>
-        </div>
-
-        <div class="setting-group">
-          <label>🌐 Webview User Agent</label>
-          <select id="uaSelect" class="setting-input">
-            <option value="desktop">Default Desktop Chrome</option>
-            <option value="mobile">Mobile Safari / iOS</option>
-            <option value="ipad">iPad Webview</option>
-          </select>
-        </div>
-
-        <div class="setting-group">
-          <label>✨ Clean Mode Options</label>
-          <div class="checkbox-row">
-            <input type="checkbox" id="chkHideAds" checked>
-            <label for="chkHideAds">Automatically hide promotional banner ads</label>
-          </div>
-          <div class="checkbox-row">
-            <input type="checkbox" id="chkHideSidebar" checked>
-            <label for="chkHideSidebar">Hide trending recommendations sidebar in feed</label>
-          </div>
-        </div>
-
-        <div class="setting-group">
-          <label>⌨️ Global Keyboard Shortcuts</label>
+          <label class="setting-label">
+            <span class="material-symbols-rounded">keyboard</span>
+            Keyboard Shortcuts
+          </label>
           <div class="shortcut-info">
-            <div><span>Reload:</span> <code>Ctrl + R / F5</code></div>
-            <div><span>Go Home:</span> <code>Ctrl + H</code></div>
-            <div><span>Login:</span> <code>Ctrl + L</code></div>
-            <div><span>Zoom:</span> <code>Ctrl + / -</code></div>
-            <div><span>Clean Mode:</span> <code>Ctrl + Shift + C</code></div>
+            <div><span>Reload</span><code>Ctrl+R · F5</code></div>
+            <div><span>Home</span><code>Ctrl+H</code></div>
+            <div><span>Login</span><code>Ctrl+L</code></div>
+            <div><span>Zoom</span><code>Ctrl + / −</code></div>
+            <div><span>Settings</span><code>Ctrl+,</code></div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
+
+      </div><!-- /modal-body -->
+    </div><!-- /modal-card -->
+  </div><!-- /settingsModal -->
 
   <script src="main.js"></script>
 </body>
