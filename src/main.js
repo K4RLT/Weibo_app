@@ -60,10 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
   let isCleanMode = true;
   let activeSideBtn = sideBtnHome;
 
+  // Elements
+  const btnEnterApp        = document.getElementById('btnEnterApp');
+
   // Window controls & titlebar menu
   const btnTitlebarMenu    = document.getElementById('btnTitlebarMenu');
 
-  getTauriWindow = () => {
+  const getTauriWindow = () => {
     try { return window.__TAURI__?.window?.getCurrentWindow?.(); } catch (_) { return null; }
   };
 
@@ -84,13 +87,32 @@ document.addEventListener('DOMContentLoaded', () => {
     getTauriWindow()?.close?.();
   });
 
+  // ── Window Sizing (QQ Style Compact Login vs Full App) ──────
+  const setWindowMode = async (isLogin) => {
+    document.body.classList.toggle('is-login-page', isLogin);
+    const win = getTauriWindow();
+    if (!win) return;
+    try {
+      // Access Tauri LogicalSize
+      const LogicalSize = window.__TAURI__?.window?.LogicalSize || window.__TAURI__?.dpi?.LogicalSize;
+      if (LogicalSize) {
+        if (isLogin) {
+          await win.setSize(new LogicalSize(440, 650));
+        } else {
+          await win.setSize(new LogicalSize(1280, 840));
+        }
+        await win.center();
+      }
+    } catch (_) {}
+  };
+
   // ── Navigation ──────────────────────────────────────────────
   const navigateTo = (url, nextBtn = null) => {
     iframe.src = url;
 
-    // Hide sidebar when on login page (QQ style)
+    // Toggle compact window vs full desktop window
     const isLoginPage = url === URLS.login || url.includes('passport') || url.includes('signin');
-    document.body.classList.toggle('is-login-page', isLoginPage);
+    setWindowMode(isLoginPage);
 
     if (nextBtn && nextBtn !== activeSideBtn) {
       activeSideBtn?.classList.remove('active');
@@ -98,6 +120,13 @@ document.addEventListener('DOMContentLoaded', () => {
       activeSideBtn = nextBtn;
     }
   };
+
+  btnEnterApp?.addEventListener('click', () => {
+    navigateTo(URLS.home, sideBtnHome);
+  });
+
+  // Start in compact login mode on launch
+  setWindowMode(true);
 
   const reloadFrame = () => {
     try { iframe.contentWindow?.location.reload(); }
