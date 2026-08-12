@@ -29,10 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const URLS = {
     home:    'https://www.weibo.com',
     hot:     'https://s.weibo.com/top/summary',
-    video:   'https://weibo.com/tv',
-    msg:     'https://weibo.com/message',
-    fav:     'https://weibo.com/fav',
-    profile: 'https://weibo.com/mygroups',
+    video:   'https://www.weibo.com/tv',
+    msg:     'https://www.weibo.com/messages',
+    fav:     'https://www.weibo.com/fav',
+    profile: 'https://www.weibo.com/self',
     login:   'https://passport.weibo.com/sso/signin',
     mobile:  'https://m.weibo.cn',
   };
