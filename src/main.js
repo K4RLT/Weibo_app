@@ -1,39 +1,47 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // ── Element References ───────────────────────────────────────
-  const iframe          = document.getElementById('weiboFrame');
-  const appSidebar      = document.getElementById('appSidebar');
-  const btnToggleSidebar= document.getElementById('btnToggleSidebar');
 
-  const btnBack         = document.getElementById('btnBack');
-  const btnForward      = document.getElementById('btnForward');
-  const btnReload       = document.getElementById('btnReload');
+  // ── Elements ─────────────────────────────────────────────────
+  const iframe             = document.getElementById('weiboFrame');
+  const settingsModal      = document.getElementById('settingsModal');
+  const btnCloseSettings   = document.getElementById('btnCloseSettings');
+  const sideBtnSettings    = document.getElementById('sideBtnSettings');
 
-  const btnLoginMode    = document.getElementById('btnLoginMode');
-  const btnDesktopMode  = document.getElementById('btnDesktopMode');
-  const btnMobileMode   = document.getElementById('btnMobileMode');
+  // Sidebar nav
+  const sideBtnHome        = document.getElementById('sideBtnHome');
+  const sideBtnHot         = document.getElementById('sideBtnHot');
+  const sideBtnVideo       = document.getElementById('sideBtnVideo');
+  const sideBtnMsg         = document.getElementById('sideBtnMsg');
+  const sideBtnFav         = document.getElementById('sideBtnFav');
+  const sideBtnProfile     = document.getElementById('sideBtnProfile');
+  const sideBtnLogin       = document.getElementById('sideBtnLogin');
 
-  const sideBtnHome     = document.getElementById('sideBtnHome');
-  const sideBtnHot      = document.getElementById('sideBtnHot');
-  const sideBtnVideo    = document.getElementById('sideBtnVideo');
-  const sideBtnMsg      = document.getElementById('sideBtnMsg');
-  const sideBtnFav      = document.getElementById('sideBtnFav');
-  const sideBtnProfile  = document.getElementById('sideBtnProfile');
-  const sideBtnLogin    = document.getElementById('sideBtnLogin');
-  const sideBtnSettings = document.getElementById('sideBtnSettings');
+  // Titlebar nav
+  const btnBack            = document.getElementById('btnBack');
+  const btnForward         = document.getElementById('btnForward');
+  const btnReload          = document.getElementById('btnReload');
 
-  const btnZoomIn       = document.getElementById('btnZoomIn');
-  const btnZoomOut      = document.getElementById('btnZoomOut');
-  const zoomLabel       = document.getElementById('zoomLevel');
-  const btnThemeToggle  = document.getElementById('btnThemeToggle');
-  const btnCleanUI      = document.getElementById('btnCleanUI');
+  // Window controls
+  const btnMinimize        = document.getElementById('btnMinimize');
+  const btnMaximize        = document.getElementById('btnMaximize');
+  const btnClose           = document.getElementById('btnClose');
 
-  const settingsModal   = document.getElementById('settingsModal');
-  const btnCloseSettings= document.getElementById('btnCloseSettings');
-  const themeSelect     = document.getElementById('themeSelect');
-  const uaSelect        = document.getElementById('uaSelect');
+  // Settings controls
+  const btnLoginMode       = document.getElementById('btnLoginMode');
+  const btnDesktopMode     = document.getElementById('btnDesktopMode');
+  const btnMobileMode      = document.getElementById('btnMobileMode');
+  const btnZoomIn          = document.getElementById('btnZoomIn');
+  const btnZoomOut         = document.getElementById('btnZoomOut');
+  const zoomLabel          = document.getElementById('zoomLevel');
+  const btnCleanUI         = document.getElementById('btnCleanUI');
+  const iconSelectedLabel  = document.getElementById('iconSelectedLabel');
+  const iconOptions        = document.querySelectorAll('.icon-option');
+  const themeChips         = document.querySelectorAll('.theme-chip');
 
-  // ── Constants ────────────────────────────────────────────────
-  const PASSPORT_LOGIN_URL = 'https://passport.weibo.com/sso/signin';
+  // Brand icons (switch with theme)
+  const sidebarBrandIcon   = document.getElementById('sidebarBrandIcon');
+  const titlebarBrandIcon  = document.getElementById('titlebarBrandIcon');
+
+  // ── URLs ────────────────────────────────────────────────────
   const URLS = {
     home:    'https://weibo.com',
     hot:     'https://s.weibo.com/top/summary',
@@ -41,52 +49,68 @@ document.addEventListener('DOMContentLoaded', () => {
     msg:     'https://weibo.com/message',
     fav:     'https://weibo.com/fav',
     profile: 'https://weibo.com/mygroups',
-    login:   PASSPORT_LOGIN_URL,
+    login:   'https://passport.weibo.com/sso/signin',
     mobile:  'https://m.weibo.cn',
   };
 
-  // FIX: Use integer steps (×10) to avoid float drift — 10 = 100%, 15 = 150%
-  const ZOOM_STEP = 1;
-  const ZOOM_MIN  = 7;   // 70%
-  const ZOOM_MAX  = 15;  // 150%
-  let zoomSteps = 10;    // starts at 100%
+  // ── State ───────────────────────────────────────────────────
+  // Integer zoom steps: 7=70% … 10=100% … 15=150%
+  const ZOOM_MIN = 7, ZOOM_MAX = 15;
+  let zoomSteps   = parseInt(localStorage.getItem('weibo_zoom')  || '10', 10);
   let isCleanMode = true;
-
-  // Cache all side-item buttons once for O(1) active-state switching
-  const allSideItems = Array.from(document.querySelectorAll('.side-item'));
   let activeSideBtn = sideBtnHome;
 
-  // ── Navigation ───────────────────────────────────────────────
-  const navigateTo = (url, nextActive = null) => {
-    iframe.src = url;
-    if (nextActive && nextActive !== activeSideBtn) {
-      activeSideBtn?.classList.remove('active');
-      nextActive.classList.add('active');
-      activeSideBtn = nextActive;
-    }
+  // Window controls & titlebar menu
+  const btnTitlebarMenu    = document.getElementById('btnTitlebarMenu');
+
+  getTauriWindow = () => {
+    try { return window.__TAURI__?.window?.getCurrentWindow?.(); } catch (_) { return null; }
   };
 
-  btnToggleSidebar?.addEventListener('click', () => {
-    appSidebar.classList.toggle('collapsed');
+  btnTitlebarMenu?.addEventListener('click', () => openSettings());
+
+  btnMinimize?.addEventListener('click', () => {
+    getTauriWindow()?.minimize?.();
   });
 
-  // FIX: use contentWindow.location.reload() instead of re-assigning src
-  const reloadFrame = () => {
-    try {
-      iframe.contentWindow?.location.reload();
-    } catch (_) {
-      // Cross-origin fallback: re-assign src
-      const currentSrc = iframe.src;
-      iframe.src = '';
-      requestAnimationFrame(() => { iframe.src = currentSrc; });
+  btnMaximize?.addEventListener('click', async () => {
+    const win = getTauriWindow();
+    if (!win) return;
+    const isMax = await win.isMaximized?.();
+    isMax ? win.unmaximize?.() : win.maximize?.();
+  });
+
+  btnClose?.addEventListener('click', () => {
+    getTauriWindow()?.close?.();
+  });
+
+  // ── Navigation ──────────────────────────────────────────────
+  const navigateTo = (url, nextBtn = null) => {
+    iframe.src = url;
+
+    // Hide sidebar when on login page (QQ style)
+    const isLoginPage = url === URLS.login || url.includes('passport') || url.includes('signin');
+    document.body.classList.toggle('is-login-page', isLoginPage);
+
+    if (nextBtn && nextBtn !== activeSideBtn) {
+      activeSideBtn?.classList.remove('active');
+      nextBtn.classList.add('active');
+      activeSideBtn = nextBtn;
     }
   };
 
-  btnBack?.addEventListener('click',   () => { try { iframe.contentWindow?.history.back();    } catch (_) {} });
+  const reloadFrame = () => {
+    try { iframe.contentWindow?.location.reload(); }
+    catch (_) {
+      const s = iframe.src; iframe.src = '';
+      requestAnimationFrame(() => { iframe.src = s; });
+    }
+  };
+
+  btnBack?.addEventListener('click',    () => { try { iframe.contentWindow?.history.back();    } catch (_) {} });
   btnForward?.addEventListener('click', () => { try { iframe.contentWindow?.history.forward(); } catch (_) {} });
   btnReload?.addEventListener('click',  reloadFrame);
 
-  // Sidebar Nav
   sideBtnHome?.addEventListener('click',    () => navigateTo(URLS.home,    sideBtnHome));
   sideBtnHot?.addEventListener('click',     () => navigateTo(URLS.hot,     sideBtnHot));
   sideBtnVideo?.addEventListener('click',   () => navigateTo(URLS.video,   sideBtnVideo));
@@ -95,19 +119,74 @@ document.addEventListener('DOMContentLoaded', () => {
   sideBtnProfile?.addEventListener('click', () => navigateTo(URLS.profile, sideBtnProfile));
   sideBtnLogin?.addEventListener('click',   () => navigateTo(URLS.login,   sideBtnLogin));
 
-  // Mode chips
-  btnLoginMode?.addEventListener('click',   () => navigateTo(URLS.login,  sideBtnLogin));
-  btnDesktopMode?.addEventListener('click', () => navigateTo(URLS.home,   sideBtnHome));
-  btnMobileMode?.addEventListener('click',  () => navigateTo(URLS.mobile));
+  // Mode chips in settings
+  btnLoginMode?.addEventListener('click',   () => { navigateTo(URLS.login,  sideBtnLogin);   closeSetting(); });
+  btnDesktopMode?.addEventListener('click', () => { navigateTo(URLS.home,   sideBtnHome);    closeSetting(); });
+  btnMobileMode?.addEventListener('click',  () => { navigateTo(URLS.mobile);                 closeSetting(); });
 
-  // ── Settings Modal ───────────────────────────────────────────
-  sideBtnSettings?.addEventListener('click', () => settingsModal?.classList.add('open'));
-  btnCloseSettings?.addEventListener('click', () => settingsModal?.classList.remove('open'));
-  settingsModal?.addEventListener('click', (e) => {
-    if (e.target === settingsModal) settingsModal.classList.remove('open');
+  // ── Settings Modal ──────────────────────────────────────────
+  const openSettings  = () => settingsModal?.classList.add('open');
+  const closeSetting  = () => settingsModal?.classList.remove('open');
+
+  sideBtnSettings?.addEventListener('click', openSettings);
+  btnCloseSettings?.addEventListener('click', closeSetting);
+  settingsModal?.addEventListener('click', (e) => { if (e.target === settingsModal) closeSetting(); });
+
+  // ── Theme ───────────────────────────────────────────────────
+  const LIGHT_THEMES = new Set(['light']);
+  const DARK_BRAND_SRC  = 'icons/weibo_circular-dark.png';   // use on light bg
+  const LIGHT_BRAND_SRC = 'icons/weibo_circular-white.png';  // use on dark bg
+
+  const applyTheme = (theme) => {
+    const KNOWN = ['dark-theme','light-theme','oled-theme','orange-theme'];
+    KNOWN.forEach(c => document.body.classList.remove(c));
+    document.body.classList.add(`${theme}-theme`);
+
+    // Switch brand icons with theme
+    const brandSrc = LIGHT_THEMES.has(theme) ? DARK_BRAND_SRC : LIGHT_BRAND_SRC;
+    if (sidebarBrandIcon)  sidebarBrandIcon.src  = brandSrc;
+    if (titlebarBrandIcon) titlebarBrandIcon.src = brandSrc;
+
+    // Highlight correct theme chip
+    themeChips.forEach(c => c.classList.toggle('active', c.dataset.theme === theme));
+
+    localStorage.setItem('weibo_theme', theme);
+  };
+
+  themeChips.forEach(chip => {
+    chip.addEventListener('click', () => applyTheme(chip.dataset.theme));
   });
 
-  // ── Icon Picker ──────────────────────────────────────────────
+  // Restore on load
+  applyTheme(localStorage.getItem('weibo_theme') || 'dark');
+
+  // ── Zoom ────────────────────────────────────────────────────
+  const updateZoom = () => {
+    const pct = zoomSteps * 10;
+    zoomLabel.textContent = `${pct}%`;
+    iframe.style.transform  = `scale(${zoomSteps / 10})`;
+    iframe.style.width      = `${1000 / zoomSteps}%`;
+    iframe.style.height     = `${1000 / zoomSteps}%`;
+    iframe.style.transformOrigin = 'top left';
+    localStorage.setItem('weibo_zoom', zoomSteps);
+  };
+
+  zoomSteps = parseInt(localStorage.getItem('weibo_zoom') || '10', 10);
+  updateZoom();
+
+  btnZoomIn?.addEventListener('click',  () => { if (zoomSteps < ZOOM_MAX) { zoomSteps++; updateZoom(); } });
+  btnZoomOut?.addEventListener('click', () => { if (zoomSteps > ZOOM_MIN) { zoomSteps--; updateZoom(); } });
+
+  // ── Clean Mode ──────────────────────────────────────────────
+  btnCleanUI?.addEventListener('click', () => {
+    isCleanMode = !isCleanMode;
+    btnCleanUI.classList.toggle('active', isCleanMode);
+    const icon = btnCleanUI.querySelector('.material-symbols-rounded');
+    if (icon) icon.textContent = isCleanMode ? 'check' : 'close';
+    btnCleanUI.lastChild.textContent = isCleanMode ? ' On' : ' Off';
+  });
+
+  // ── Icon Picker ─────────────────────────────────────────────
   const ICON_LABELS = {
     'weibo_block-normal':    'Original',
     'weibo_block-dark':      'Dark',
@@ -117,113 +196,30 @@ document.addEventListener('DOMContentLoaded', () => {
     'weibo_circular-white':  'Circle White',
   };
 
-  const iconSelectedLabel = document.getElementById('iconSelectedLabel');
-  const iconOptions = document.querySelectorAll('.icon-option');
-
-  const selectIcon = (iconKey) => {
-    iconOptions.forEach(btn => {
-      btn.classList.toggle('selected', btn.dataset.icon === iconKey);
-    });
-    // FIX: use textContent + DOM nodes instead of innerHTML to avoid XSS risk
+  const selectIcon = (key) => {
+    iconOptions.forEach(btn => btn.classList.toggle('selected', btn.dataset.icon === key));
     if (iconSelectedLabel) {
       iconSelectedLabel.textContent = 'Selected: ';
-      const strong = document.createElement('strong');
-      strong.textContent = ICON_LABELS[iconKey] || iconKey;
-      iconSelectedLabel.appendChild(strong);
+      const s = document.createElement('strong');
+      s.textContent = ICON_LABELS[key] || key;
+      iconSelectedLabel.appendChild(s);
     }
-    localStorage.setItem('weibo_icon', iconKey);
+    localStorage.setItem('weibo_icon', key);
     if (window.__TAURI__) {
-      window.__TAURI__.core.invoke('set_app_icon', { iconKey }).catch(() => {});
+      window.__TAURI__.core?.invoke?.('set_app_icon', { iconKey: key }).catch(() => {});
     }
   };
 
-  const savedIcon = localStorage.getItem('weibo_icon') || 'weibo_block-normal';
-  selectIcon(savedIcon);
-
-  iconOptions.forEach(btn => {
-    btn.addEventListener('click', () => selectIcon(btn.dataset.icon));
-  });
-
-  // ── Theme ────────────────────────────────────────────────────
-  const THEME_CLASSES = ['dark-theme', 'light-theme', 'oled-theme', 'orange-theme'];
-
-  // FIX: only remove known theme classes, don't wipe all body classes
-  const applyTheme = (themeName) => {
-    THEME_CLASSES.forEach(cls => document.body.classList.remove(cls));
-    document.body.classList.add(`${themeName}-theme`);
-    btnThemeToggle.textContent = themeName === 'light' ? '☀️' : '🌙';
-    localStorage.setItem('weibo_theme', themeName);
-  };
-
-  // Restore saved theme on load
-  const savedTheme = localStorage.getItem('weibo_theme') || 'dark';
-  applyTheme(savedTheme);
-  if (themeSelect) themeSelect.value = savedTheme;
-
-  themeSelect?.addEventListener('change', (e) => applyTheme(e.target.value));
-  btnThemeToggle?.addEventListener('click', () => {
-    const isDark = document.body.classList.contains('dark-theme') ||
-                   document.body.classList.contains('oled-theme');
-    applyTheme(isDark ? 'light' : 'dark');
-  });
-
-  // ── User Agent Switcher ──────────────────────────────────────
-  uaSelect?.addEventListener('change', (e) => {
-    navigateTo(e.target.value === 'mobile' ? URLS.mobile : URLS.home);
-  });
-
-  // ── Zoom Controls (integer steps — no float drift) ───────────
-  const updateZoom = () => {
-    const pct = zoomSteps * 10;
-    zoomLabel.textContent = `${pct}%`;
-    iframe.style.transform = `scale(${zoomSteps / 10})`;
-    iframe.style.width  = `${1000 / zoomSteps}%`;
-    iframe.style.height = `${1000 / zoomSteps}%`;
-    localStorage.setItem('weibo_zoom', zoomSteps);
-  };
-
-  // Restore saved zoom
-  zoomSteps = parseInt(localStorage.getItem('weibo_zoom') || '10', 10);
-  updateZoom();
-
-  btnZoomIn?.addEventListener('click', () => {
-    if (zoomSteps < ZOOM_MAX) { zoomSteps += ZOOM_STEP; updateZoom(); }
-  });
-  btnZoomOut?.addEventListener('click', () => {
-    if (zoomSteps > ZOOM_MIN) { zoomSteps -= ZOOM_STEP; updateZoom(); }
-  });
-
-  // ── Clean Mode ───────────────────────────────────────────────
-  btnCleanUI?.addEventListener('click', () => {
-    isCleanMode = !isCleanMode;
-    btnCleanUI.classList.toggle('active-toggle', isCleanMode);
-    btnCleanUI.textContent = isCleanMode ? '✨ Clean Mode' : '🌐 Normal Mode';
-  });
+  iconOptions.forEach(btn => btn.addEventListener('click', () => selectIcon(btn.dataset.icon)));
+  selectIcon(localStorage.getItem('weibo_icon') || 'weibo_block-normal');
 
   // ── Keyboard Shortcuts ───────────────────────────────────────
-  // Stored as named function so it could be removed if needed
-  const handleKeydown = (e) => {
-    if (e.ctrlKey && e.key === 'r' || e.key === 'F5') {
-      e.preventDefault();
-      reloadFrame();
-    }
-    if (e.ctrlKey && e.key.toLowerCase() === 'h') {
-      e.preventDefault();
-      navigateTo(URLS.home, sideBtnHome);
-    }
-    if (e.ctrlKey && e.key.toLowerCase() === 'l') {
-      e.preventDefault();
-      navigateTo(URLS.login, sideBtnLogin);
-    }
-    if (e.ctrlKey && (e.key === '=' || e.key === '+')) {
-      e.preventDefault();
-      if (zoomSteps < ZOOM_MAX) { zoomSteps += ZOOM_STEP; updateZoom(); }
-    }
-    if (e.ctrlKey && e.key === '-') {
-      e.preventDefault();
-      if (zoomSteps > ZOOM_MIN) { zoomSteps -= ZOOM_STEP; updateZoom(); }
-    }
-  };
-
-  window.addEventListener('keydown', handleKeydown);
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') { e.preventDefault(); reloadFrame(); }
+    if (e.ctrlKey && e.key.toLowerCase() === 'h')       { e.preventDefault(); navigateTo(URLS.home,  sideBtnHome); }
+    if (e.ctrlKey && e.key.toLowerCase() === 'l')       { e.preventDefault(); navigateTo(URLS.login, sideBtnLogin); }
+    if (e.ctrlKey && e.key === ',')                     { e.preventDefault(); openSettings(); }
+    if (e.ctrlKey && (e.key === '=' || e.key === '+'))  { e.preventDefault(); if (zoomSteps < ZOOM_MAX) { zoomSteps++; updateZoom(); } }
+    if (e.ctrlKey && e.key === '-')                     { e.preventDefault(); if (zoomSteps > ZOOM_MIN) { zoomSteps--; updateZoom(); } }
+  });
 });
