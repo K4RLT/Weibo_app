@@ -93,11 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const win = getTauriWindow();
     if (!win) return;
     try {
-      // Access Tauri LogicalSize
       const LogicalSize = window.__TAURI__?.window?.LogicalSize || window.__TAURI__?.dpi?.LogicalSize;
       if (LogicalSize) {
         if (isLogin) {
-          await win.setSize(new LogicalSize(440, 650));
+          await win.setSize(new LogicalSize(760, 580));
         } else {
           await win.setSize(new LogicalSize(1280, 840));
         }
