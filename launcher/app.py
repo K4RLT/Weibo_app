@@ -1,6 +1,6 @@
 import webview
 
-LOGIN_URL = 'https://passport.weibo.com/sso/signin?entry=miniblog&source=miniblog&disp=popup&url=https%3A%2F%2Fweibo.com%2Fnewlogin%3Ftabtype%3Dweibo%26gid%3D102803%26openLoginLayer%3D0%26url%3Dhttps%3A%2F%2Fwww.weibo.com%2F&from=weibopro'
+LOGIN_URL = 'https://passport.weibo.com/sso/signin'
 
 def main():
     # Create persistent session webview window for Weibo
