@@ -266,6 +266,56 @@ html, body {
   letter-spacing: 0.5px;
 }
 
+.setting-note {
+  font-size: 11px;
+  color: var(--adw-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: -2px;
+}
+
+.icon-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.icon-opt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: var(--adw-bg-base);
+  border: 1.5px solid var(--adw-border);
+  border-radius: var(--adw-radius-m);
+  padding: 10px 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.icon-opt img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.icon-opt span {
+  font-size: 10px;
+  color: var(--adw-text-muted);
+  font-weight: 500;
+}
+
+.icon-opt:hover {
+  border-color: var(--adw-accent);
+}
+
+.icon-opt.selected {
+  border-color: var(--adw-accent);
+  background: rgba(255, 130, 0, 0.10);
+}
+
 .chip-row {
   display: flex;
   gap: 6px;
@@ -294,58 +344,6 @@ html, body {
   border-color: transparent;
 }
 
-.zoom-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.zoom-btn {
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--adw-border);
-  background: transparent;
-  color: var(--adw-text);
-  border-radius: var(--adw-radius-s);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.zoom-label {
-  font-size: 12px;
-  font-weight: 600;
-  min-width: 40px;
-  text-align: center;
-}
-
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.toggle-desc {
-  font-size: 12px;
-  color: var(--adw-text-muted);
-}
-
-.toggle-btn {
-  padding: 4px 10px;
-  border: 1px solid var(--adw-border);
-  background: transparent;
-  color: var(--adw-text-muted);
-  border-radius: var(--adw-radius-s);
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.toggle-btn.active {
-  background: var(--adw-accent);
-  color: #ffffff;
-  border-color: transparent;
-}
 
 .shortcut-info {
   background: var(--adw-bg-base);
