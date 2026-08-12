@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── State ───────────────────────────────────────────────────
   let activeSideBtn = sideBtnHome;
-  let wasOnLoginPage = true;
+  let wasOnLoginPage = false;
 
   // ── Login button visibility ─────────────────────────────────
   const isLoginUrl = (url) =>
