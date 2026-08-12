@@ -3,8 +3,8 @@
 
 use tauri::{
     image::Image,
-    webview::{WebviewBuilder, WebviewUrl},
-    Emitter, LogicalPosition, LogicalSize, Manager, Rect,
+    webview::WebviewBuilder,
+    Emitter, LogicalPosition, LogicalSize, Manager, Rect, WebviewUrl,
 };
 
 // Embedded icon bytes at compile time
