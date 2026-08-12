@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  weibo-tauri-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+    volumes:
+      - .:/app
+      - ./dist:/app/src-tauri/target/release/bundle
