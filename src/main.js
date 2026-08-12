@@ -2,11 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Elements ─────────────────────────────────────────────────
   const contentViewport    = document.getElementById('contentViewport');
-  const settingsModal      = document.getElementById('settingsModal');
-  const btnCloseSettings   = document.getElementById('btnCloseSettings');
   const btnToggleSidebar   = document.getElementById('btnToggleSidebar');
   const appSidebar         = document.getElementById('appSidebar');
-  const themeChips         = document.querySelectorAll('[data-theme]');
 
   // Sidebar nav
   const sideBtnHome        = document.getElementById('sideBtnHome');
@@ -135,13 +132,12 @@ document.addEventListener('DOMContentLoaded', () => {
   sideBtnProfile?.addEventListener('click', () => navigateTo(URLS.profile, sideBtnProfile));
   sideBtnLogin?.addEventListener('click',   () => navigateTo(URLS.login,   sideBtnLogin));
 
-  // ── Settings Modal ──────────────────────────────────────────
-  const openSettings  = () => settingsModal?.classList.add('open');
-  const closeSettings = () => settingsModal?.classList.remove('open');
+  // ── Settings (Preferences) Window ───────────────────────────
+  const openSettings = () => {
+    invokeTauri('open_settings_window');
+  };
 
   sideBtnSettings?.addEventListener('click', openSettings);
-  btnCloseSettings?.addEventListener('click', closeSettings);
-  settingsModal?.addEventListener('click', (e) => { if (e.target === settingsModal) closeSettings(); });
 
   // ── Sidebar Toggle (burger menu) ────────────────────────────
   btnToggleSidebar?.addEventListener('click', () => {
@@ -153,37 +149,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Theme ───────────────────────────────────────────────────
   const applyTheme = (theme) => {
-    document.body.classList.remove('adw-dark', 'adw-light');
-    document.body.classList.add(`adw-${theme}`);
-    themeChips.forEach(c => c.classList.toggle('chip-active', c.dataset.theme === theme));
+    document.documentElement.className = theme === 'light' ? 'adw-light' : 'adw-dark';
     localStorage.setItem('weibo_theme', theme);
   };
 
-  themeChips.forEach(chip => {
-    chip.addEventListener('click', () => applyTheme(chip.dataset.theme));
-  });
-
   applyTheme(localStorage.getItem('weibo_theme') || 'dark');
 
-  // ── App Icon Picker ──────────────────────────────────────────
-  const iconOpts = document.querySelectorAll('.icon-opt');
-
-  const selectIcon = (key) => {
-    iconOpts.forEach(btn => btn.classList.toggle('selected', btn.dataset.icon === key));
-    localStorage.setItem('weibo_icon', key);
-    // Tell Rust to persist and apply the icon
-    if (window.__TAURI__?.core?.invoke) {
-      window.__TAURI__.core.invoke('set_app_icon', { iconKey: key }).catch(() => {});
-    }
-  };
-
-  iconOpts.forEach(btn => {
-    btn.addEventListener('click', () => selectIcon(btn.dataset.icon));
-  });
-
-  // Restore saved icon selection highlight on load
-  const savedIcon = localStorage.getItem('weibo_icon') || 'weibo_block-normal';
-  iconOpts.forEach(btn => btn.classList.toggle('selected', btn.dataset.icon === savedIcon));
+  // Listen for theme-changed events from settings window
+  if (window.__TAURI__?.event?.listen) {
+    window.__TAURI__.event.listen('theme-changed', (event) => {
+      applyTheme(event.payload);
+    });
+  }
 
   // ── Keyboard Shortcuts ───────────────────────────────────────
   window.addEventListener('keydown', (e) => {
@@ -193,21 +170,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.ctrlKey && e.key === ',')                     { e.preventDefault(); openSettings(); }
   });
 
-  // ── Window Controls (for frameless integration) ─────────────
+  // ── Window Controls (using custom Rust commands) ────────────
   const winMin   = document.getElementById('winMin');
   const winMax   = document.getElementById('winMax');
   const winClose = document.getElementById('winClose');
 
-  if (window.__TAURI__?.window?.getCurrentWindow) {
-    const appWindow = window.__TAURI__.window.getCurrentWindow();
-    winMin?.addEventListener('click',   () => appWindow.minimize());
-    winMax?.addEventListener('click',   async () => {
-      if (await appWindow.isMaximized()) {
-        appWindow.unmaximize();
-      } else {
-        appWindow.maximize();
-      }
-    });
-    winClose?.addEventListener('click', () => appWindow.close());
-  }
+  winMin?.addEventListener('click',   () => invokeTauri('minimize_window'));
+  winMax?.addEventListener('click',   () => invokeTauri('toggle_maximize_window'));
+  winClose?.addEventListener('click', () => invokeTauri('close_window'));
+
+  // Drag region using custom drag command
+  const adwToolbar = document.querySelector('.adw-toolbar');
+  adwToolbar?.addEventListener('mousedown', (e) => {
+    if (!e.target.closest('button')) {
+      invokeTauri('drag_window');
+    }
+  });
 });

@@ -84,77 +84,7 @@
 
   </div>
 
-  <!-- ═══ Preferences Modal ═════════════════════════════════════ -->
-  <div class="modal-overlay" id="settingsModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <span class="material-symbols-rounded">settings</span>
-        <h3>Preferences</h3>
-        <button class="modal-close" id="btnCloseSettings">
-          <span class="material-symbols-rounded">close</span>
-        </button>
-      </div>
 
-      <div class="modal-body">
-
-        <!-- App Icon -->
-        <div class="setting-group">
-          <label class="setting-label">App Icon</label>
-          <p class="setting-note">
-            <span class="material-symbols-rounded" style="font-size:14px;vertical-align:-3px">info</span>
-            Changes apply after restarting the app.
-          </p>
-          <div class="icon-picker">
-            <button class="icon-opt" data-icon="weibo_block-normal" id="iconOpt0">
-              <img src="icons/weibo_block-normal.png" alt="Original">
-              <span>Original</span>
-            </button>
-            <button class="icon-opt" data-icon="weibo_block-dark" id="iconOpt1">
-              <img src="icons/weibo_block-dark.png" alt="Block Dark">
-              <span>Dark</span>
-            </button>
-            <button class="icon-opt" data-icon="weibo_block-white" id="iconOpt2">
-              <img src="icons/weibo_block-white.png" alt="Block White">
-              <span>White</span>
-            </button>
-            <button class="icon-opt" data-icon="weibo_circular-normal" id="iconOpt3">
-              <img src="icons/weibo_circular-normal.png" alt="Circle">
-              <span>Circle</span>
-            </button>
-            <button class="icon-opt" data-icon="weibo_circular-dark" id="iconOpt4">
-              <img src="icons/weibo_circular-dark.png" alt="Circle Dark">
-              <span>Circle Dark</span>
-            </button>
-            <button class="icon-opt" data-icon="weibo_circular-white" id="iconOpt5">
-              <img src="icons/weibo_circular-white.png" alt="Circle White">
-              <span>Circle White</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Theme -->
-        <div class="setting-group">
-          <label class="setting-label">Theme</label>
-          <div class="chip-row">
-            <button class="chip chip-active" data-theme="dark" id="themeChipDark">Dark</button>
-            <button class="chip" data-theme="light" id="themeChipLight">Light</button>
-          </div>
-        </div>
-
-        <!-- Shortcuts -->
-        <div class="setting-group">
-          <label class="setting-label">Keyboard Shortcuts</label>
-          <div class="shortcut-info">
-            <div><span>Reload</span><code>Ctrl+R</code></div>
-            <div><span>Home</span><code>Ctrl+H</code></div>
-            <div><span>Login</span><code>Ctrl+L</code></div>
-            <div><span>Preferences</span><code>Ctrl+,</code></div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
 
   <script src="main.js"></script>
 </body>

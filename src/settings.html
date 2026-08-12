@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preferences</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      padding: 20px;
+      overflow-y: auto;
+      height: 100vh;
+      box-sizing: border-box;
+      background: var(--adw-bg-base);
+    }
+    .settings-container {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    .setting-group {
+      margin-bottom: 24px;
+    }
+    .setting-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--adw-text);
+      margin-bottom: 8px;
+      display: block;
+    }
+    .setting-note {
+      font-size: 11px;
+      color: var(--adw-text-muted);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body class="adw-dark">
+  <div class="settings-container">
+    <!-- App Icon -->
+    <div class="setting-group">
+      <label class="setting-label">App Icon</label>
+      <p class="setting-note">
+        <span class="material-symbols-rounded" style="font-size:14px;vertical-align:-3px">info</span>
+        Changes apply after restarting the app.
+      </p>
+      <div class="icon-picker">
+        <button class="icon-opt" data-icon="weibo_block-normal" id="iconOpt0">
+          <img src="icons/weibo_block-normal.png" alt="Original">
+          <span>Original</span>
+        </button>
+        <button class="icon-opt" data-icon="weibo_block-dark" id="iconOpt1">
+          <img src="icons/weibo_block-dark.png" alt="Block Dark">
+          <span>Dark</span>
+        </button>
+        <button class="icon-opt" data-icon="weibo_block-white" id="iconOpt2">
+          <img src="icons/weibo_block-white.png" alt="Block White">
+          <span>White</span>
+        </button>
+        <button class="icon-opt" data-icon="weibo_circular-normal" id="iconOpt3">
+          <img src="icons/weibo_circular-normal.png" alt="Circle">
+          <span>Circle</span>
+        </button>
+        <button class="icon-opt" data-icon="weibo_circular-dark" id="iconOpt4">
+          <img src="icons/weibo_circular-dark.png" alt="Circle Dark">
+          <span>Circle Dark</span>
+        </button>
+        <button class="icon-opt" data-icon="weibo_circular-white" id="iconOpt5">
+          <img src="icons/weibo_circular-white.png" alt="Circle White">
+          <span>Circle White</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Theme -->
+    <div class="setting-group">
+      <label class="setting-label">Theme</label>
+      <div class="chip-row">
+        <button class="chip" data-theme="dark" id="themeChipDark">Dark</button>
+        <button class="chip" data-theme="light" id="themeChipLight">Light</button>
+      </div>
+    </div>
+
+    <!-- Shortcuts -->
+    <div class="setting-group">
+      <label class="setting-label">Keyboard Shortcuts</label>
+      <div class="shortcut-info">
+        <div><span>Reload</span><code>Ctrl+R</code></div>
+        <div><span>Home</span><code>Ctrl+H</code></div>
+        <div><span>Login</span><code>Ctrl+L</code></div>
+        <div><span>Preferences</span><code>Ctrl+,</code></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

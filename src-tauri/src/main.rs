@@ -130,6 +130,50 @@ fn set_app_icon(window: tauri::Window, icon_key: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn minimize_window(window: tauri::Window) {
+    let _ = window.minimize();
+}
+
+#[tauri::command]
+fn toggle_maximize_window(window: tauri::Window) {
+    if let Ok(true) = window.is_maximized() {
+        let _ = window.unmaximize();
+    } else {
+        let _ = window.maximize();
+    }
+}
+
+#[tauri::command]
+fn close_window(window: tauri::Window) {
+    let _ = window.close();
+}
+
+#[tauri::command]
+fn drag_window(window: tauri::Window) {
+    let _ = window.start_dragging();
+}
+
+#[tauri::command]
+fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
+    if let Some(existing) = app_handle.get_webview_window("settings") {
+        existing.set_focus().map_err(|e| e.to_string())?;
+    } else {
+        tauri::WebviewWindowBuilder::new(
+            &app_handle,
+            "settings",
+            tauri::WebviewUrl::App("settings.html".into()),
+        )
+        .title("Preferences · 首选项")
+        .inner_size(480.0, 520.0)
+        .resizable(false)
+        .center()
+        .build()
+        .map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 fn main() {
     let saved_key = read_saved_icon_key();
 
@@ -141,7 +185,12 @@ fn main() {
             navigate_weibo,
             reload_weibo,
             back_weibo,
-            forward_weibo
+            forward_weibo,
+            minimize_window,
+            toggle_maximize_window,
+            close_window,
+            drag_window,
+            open_settings_window
         ])
         .setup(move |app| {
             // Apply saved icon on startup
