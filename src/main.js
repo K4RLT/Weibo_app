@@ -56,9 +56,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const isLoginUrl = (url) =>
     url.includes('passport') || url.includes('signin');
 
-  const updateLoginBtn = (url) => {
+  const updateSidebarAndLoginVisibility = (url) => {
+    const onLogin = isLoginUrl(url);
+    if (appSidebar) {
+      appSidebar.style.display = onLogin ? 'none' : 'flex';
+    }
+    if (btnToggleSidebar) {
+      btnToggleSidebar.style.display = onLogin ? 'none' : 'flex';
+    }
     if (sideBtnLogin) {
-      sideBtnLogin.style.display = isLoginUrl(url) ? 'flex' : 'none';
+      sideBtnLogin.style.display = onLogin ? 'flex' : 'none';
     }
   };
 
@@ -66,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const navigateTo = (url, nextBtn = null) => {
     invokeTauri('navigate_weibo', { url });
     wasOnLoginPage = isLoginUrl(url);
-    updateLoginBtn(url);
+    updateSidebarAndLoginVisibility(url);
 
     if (nextBtn && nextBtn !== activeSideBtn) {
       activeSideBtn?.classList.remove('active');
@@ -87,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       wasOnLoginPage = isLoginUrl(url);
-      updateLoginBtn(url);
+      updateSidebarAndLoginVisibility(url);
     });
   }
 
