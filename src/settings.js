@@ -42,4 +42,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Restore saved icon selection highlight on load
   const savedIcon = localStorage.getItem('weibo_icon') || 'weibo_block-normal';
   iconOpts.forEach(btn => btn.classList.toggle('selected', btn.dataset.icon === savedIcon));
+
+  // ── Cache Cleaner ────────────────────────────────────────────
+  const btnClearData = document.getElementById('btnClearData');
+
+  btnClearData?.addEventListener('click', async () => {
+    if (confirm('Are you sure you want to clear all cache and cookies? This will log you out of Weibo.')) {
+      if (window.__TAURI__?.core?.invoke) {
+        try {
+          await window.__TAURI__.core.invoke('clear_webview_data');
+          alert('Browsing data cleared successfully! The app will reload.');
+          // Reload the main window webview
+          await window.__TAURI__.core.invoke('reload_weibo');
+          // Reload this settings window
+          location.reload();
+        } catch (e) {
+          alert('Failed to clear browsing data: ' + e);
+        }
+      }
+    }
+  });
 });

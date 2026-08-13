@@ -254,6 +254,17 @@ fn apply_weibo_theme(
     Ok(())
 }
 
+#[tauri::command]
+fn clear_webview_data(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(webview) = app.get_webview("weibo_child") {
+        webview.clear_all_browsing_data().map_err(|e| e.to_string())?;
+    }
+    if let Some(main_win) = app.get_webview_window("main") {
+        main_win.clear_all_browsing_data().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 fn main() {
     let saved_key = read_saved_icon_key();
 
@@ -271,7 +282,8 @@ fn main() {
             close_window,
             drag_window,
             open_settings_window,
-            apply_weibo_theme
+            apply_weibo_theme,
+            clear_webview_data
         ])
         .setup(move |app| {
             // Apply saved icon on startup
