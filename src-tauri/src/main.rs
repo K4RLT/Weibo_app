@@ -52,6 +52,25 @@ impl Default for ChildWebviewState {
     }
 }
 
+fn get_user_agent() -> &'static str {
+    #[cfg(target_os = "linux")]
+    {
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    }
+    #[cfg(target_os = "macos")]
+    {
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    }
+    #[cfg(target_os = "windows")]
+    {
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    }
+    #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
+    {
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    }
+}
+
 #[tauri::command]
 fn set_webview_bounds(
     window: tauri::Window,
@@ -69,7 +88,7 @@ fn set_webview_bounds(
         let url_str = "https://www.weibo.com";
         let url = url::Url::parse(url_str).map_err(|e| e.to_string())?;
 
-        let ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+        let ua = get_user_agent();
 
         let app_handle_clone = app_handle.clone();
         let state_clone = app_handle.state::<ChildWebviewState>();
