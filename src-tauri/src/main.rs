@@ -102,11 +102,11 @@ fn set_webview_bounds(
                 if let tauri::webview::PageLoadEvent::Finished = payload.event() {
                     let is_dark_mode = {
                         let state = app_handle_clone2.state::<ChildWebviewState>();
-                        if let Ok(guard) = state.is_dark.lock() {
-                            *guard
-                        } else {
-                            true
-                        }
+                        let is_dark = match state.is_dark.lock() {
+                            Ok(guard) => *guard,
+                            Err(_) => true,
+                        };
+                        is_dark
                     };
                     if is_dark_mode {
                         let css = "html { filter: invert(1) hue-rotate(180deg) !important; } img, video, [style*=\\\"background-image\\\"], .oauth_avatar, .avatar, [class*=\\\"avatar\\\"], .pic, [class*=\\\"pic\\\"] { filter: invert(1) hue-rotate(180deg) !important; }";
