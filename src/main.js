@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Elements ─────────────────────────────────────────────────
   const contentViewport    = document.getElementById('contentViewport');
-  const btnToggleSidebar   = document.getElementById('btnToggleSidebar');
   const appSidebar         = document.getElementById('appSidebar');
 
   // Sidebar nav
@@ -58,8 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (appSidebar) {
       appSidebar.style.display = onLogin ? 'none' : 'flex';
     }
-    if (btnToggleSidebar) {
-      btnToggleSidebar.style.display = onLogin ? 'none' : 'flex';
+    if (sideBtnSettings) {
+      sideBtnSettings.style.display = onLogin ? 'none' : 'flex';
     }
     if (sideBtnLogin) {
       sideBtnLogin.style.display = onLogin ? 'flex' : 'none';
@@ -139,18 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   sideBtnSettings?.addEventListener('click', openSettings);
 
-  // ── Sidebar Toggle (burger menu) ────────────────────────────
-  btnToggleSidebar?.addEventListener('click', () => {
-    if (appSidebar) {
-      const hidden = appSidebar.style.display === 'none';
-      appSidebar.style.display = hidden ? 'flex' : 'none';
-    }
-  });
+
 
   // ── Theme ───────────────────────────────────────────────────
   const applyTheme = (theme) => {
     document.documentElement.className = theme === 'light' ? 'adw-light' : 'adw-dark';
     localStorage.setItem('weibo_theme', theme);
+    invokeTauri('apply_weibo_theme', { isDark: theme === 'dark' });
   };
 
   applyTheme(localStorage.getItem('weibo_theme') || 'dark');

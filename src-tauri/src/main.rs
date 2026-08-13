@@ -38,7 +38,19 @@ fn read_saved_icon_key() -> String {
         .to_string()
 }
 
-struct ChildWebviewState(std::sync::Mutex<bool>);
+struct ChildWebviewState {
+    created: std::sync::Mutex<bool>,
+    is_dark: std::sync::Mutex<bool>,
+}
+
+impl Default for ChildWebviewState {
+    fn default() -> Self {
+        Self {
+            created: std::sync::Mutex::new(false),
+            is_dark: std::sync::Mutex::new(true),
+        }
+    }
+}
 
 #[tauri::command]
 fn set_webview_bounds(
@@ -50,7 +62,7 @@ fn set_webview_bounds(
     width: f64,
     height: f64,
 ) -> Result<(), String> {
-    let mut created = state.0.lock().map_err(|e| e.to_string())?;
+    let mut created = state.created.lock().map_err(|e| e.to_string())?;
 
     if !*created {
         let label = "weibo_child";
@@ -60,11 +72,34 @@ fn set_webview_bounds(
         let ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
         let app_handle_clone = app_handle.clone();
+        let state_clone = app_handle.state::<ChildWebviewState>();
         let webview_builder = WebviewBuilder::new(label, WebviewUrl::External(url))
             .user_agent(ua)
             .on_navigation(move |url| {
                 let _ = app_handle_clone.emit("weibo-nav", url.as_str());
                 true
+            })
+            .on_page_load(move |webview, payload| {
+                if let tauri::webview::PageLoadEvent::Finished = payload.event() {
+                    if let Ok(is_dark) = state_clone.is_dark.lock() {
+                        if *is_dark {
+                            let css = "html { filter: invert(1) hue-rotate(180deg) !important; } img, video, [style*=\\\"background-image\\\"], .oauth_avatar, .avatar, [class*=\\\"avatar\\\"], .pic, [class*=\\\"pic\\\"] { filter: invert(1) hue-rotate(180deg) !important; }";
+                            let js = format!(
+                                "(function() {{ \
+                                    let style = document.getElementById('weibo-dark-mode-override'); \
+                                    if (!style) {{ \
+                                        style = document.createElement('style'); \
+                                        style.id = 'weibo-dark-mode-override'; \
+                                        style.innerHTML = '{}'; \
+                                        document.documentElement.appendChild(style); \
+                                    }} \
+                                }})();",
+                                css
+                            );
+                            let _ = webview.eval(&js);
+                        }
+                    }
+                }
             });
 
         let position = LogicalPosition::new(x, y);
@@ -174,11 +209,56 @@ fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn apply_weibo_theme(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, ChildWebviewState>,
+    is_dark: bool,
+) -> Result<(), String> {
+    if let Ok(mut is_dark_guard) = state.is_dark.lock() {
+        *is_dark_guard = is_dark;
+    }
+
+    if let Some(webview) = app.get_webview("weibo_child") {
+        let css = "html { filter: invert(1) hue-rotate(180deg) !important; } img, video, [style*=\\\"background-image\\\"], .oauth_avatar, .avatar, [class*=\\\"avatar\\\"], .pic, [class*=\\\"pic\\\"] { filter: invert(1) hue-rotate(180deg) !important; }";
+        let js = format!(
+            "(function() {{ \
+                let style = document.getElementById('weibo-dark-mode-override'); \
+                if ({}) {{ \
+                    if (!style) {{ \
+                        style = document.createElement('style'); \
+                        style.id = 'weibo-dark-mode-override'; \
+                        style.innerHTML = '{}'; \
+                        document.documentElement.appendChild(style); \
+                    }} \
+                }} else {{ \
+                    if (style) {{ \
+                        style.remove(); \
+                    }} \
+                }} \
+            }})();",
+            is_dark, css
+        );
+        let _ = webview.eval(&js);
+    }
+
+    // Also update the native window themes
+    let theme = if is_dark { tauri::Theme::Dark } else { tauri::Theme::Light };
+    if let Some(main_win) = app.get_webview_window("main") {
+        let _ = main_win.set_theme(Some(theme));
+    }
+    if let Some(settings_win) = app.get_webview_window("settings") {
+        let _ = settings_win.set_theme(Some(theme));
+    }
+
+    Ok(())
+}
+
 fn main() {
     let saved_key = read_saved_icon_key();
 
     tauri::Builder::default()
-        .manage(ChildWebviewState(std::sync::Mutex::new(false)))
+        .manage(ChildWebviewState::default())
         .invoke_handler(tauri::generate_handler![
             set_app_icon,
             set_webview_bounds,
@@ -190,7 +270,8 @@ fn main() {
             toggle_maximize_window,
             close_window,
             drag_window,
-            open_settings_window
+            open_settings_window,
+            apply_weibo_theme
         ])
         .setup(move |app| {
             // Apply saved icon on startup
