@@ -100,24 +100,29 @@ fn set_webview_bounds(
             })
             .on_page_load(move |webview, payload| {
                 if let tauri::webview::PageLoadEvent::Finished = payload.event() {
-                    let state = app_handle_clone2.state::<ChildWebviewState>();
-                    if let Ok(is_dark) = state.is_dark.lock() {
-                        if *is_dark {
-                            let css = "html { filter: invert(1) hue-rotate(180deg) !important; } img, video, [style*=\\\"background-image\\\"], .oauth_avatar, .avatar, [class*=\\\"avatar\\\"], .pic, [class*=\\\"pic\\\"] { filter: invert(1) hue-rotate(180deg) !important; }";
-                            let js = format!(
-                                "(function() {{ \
-                                    let style = document.getElementById('weibo-dark-mode-override'); \
-                                    if (!style) {{ \
-                                        style = document.createElement('style'); \
-                                        style.id = 'weibo-dark-mode-override'; \
-                                        style.innerHTML = '{}'; \
-                                        document.documentElement.appendChild(style); \
-                                    }} \
-                                }})();",
-                                css
-                            );
-                            let _ = webview.eval(&js);
+                    let is_dark_mode = {
+                        let state = app_handle_clone2.state::<ChildWebviewState>();
+                        if let Ok(guard) = state.is_dark.lock() {
+                            *guard
+                        } else {
+                            true
                         }
+                    };
+                    if is_dark_mode {
+                        let css = "html { filter: invert(1) hue-rotate(180deg) !important; } img, video, [style*=\\\"background-image\\\"], .oauth_avatar, .avatar, [class*=\\\"avatar\\\"], .pic, [class*=\\\"pic\\\"] { filter: invert(1) hue-rotate(180deg) !important; }";
+                        let js = format!(
+                            "(function() {{ \
+                                let style = document.getElementById('weibo-dark-mode-override'); \
+                                if (!style) {{ \
+                                    style = document.createElement('style'); \
+                                    style.id = 'weibo-dark-mode-override'; \
+                                    style.innerHTML = '{}'; \
+                                    document.documentElement.appendChild(style); \
+                                }} \
+                            }})();",
+                            css
+                        );
+                        let _ = webview.eval(&js);
                     }
                 }
             });
