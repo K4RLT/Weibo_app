@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Call Rust backend to change and save the app icon
     if (window.__TAURI__?.core?.invoke) {
-      window.__TAURI__.core.invoke('set_app_icon', { iconKey: key }).catch(() => {});
+      window.__TAURI__.core.invoke('set_app_icon', { icon_key: key }).catch(() => {});
     }
   };
 

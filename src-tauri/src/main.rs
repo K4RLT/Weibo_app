@@ -91,7 +91,7 @@ fn set_webview_bounds(
         let ua = get_user_agent();
 
         let app_handle_clone = app_handle.clone();
-        let state_clone = app_handle.state::<ChildWebviewState>();
+        let app_handle_clone2 = app_handle.clone();
         let webview_builder = WebviewBuilder::new(label, WebviewUrl::External(url))
             .user_agent(ua)
             .on_navigation(move |url| {
@@ -100,7 +100,8 @@ fn set_webview_bounds(
             })
             .on_page_load(move |webview, payload| {
                 if let tauri::webview::PageLoadEvent::Finished = payload.event() {
-                    if let Ok(is_dark) = state_clone.is_dark.lock() {
+                    let state = app_handle_clone2.state::<ChildWebviewState>();
+                    if let Ok(is_dark) = state.is_dark.lock() {
                         if *is_dark {
                             let css = "html { filter: invert(1) hue-rotate(180deg) !important; } img, video, [style*=\\\"background-image\\\"], .oauth_avatar, .avatar, [class*=\\\"avatar\\\"], .pic, [class*=\\\"pic\\\"] { filter: invert(1) hue-rotate(180deg) !important; }";
                             let js = format!(
@@ -169,17 +170,23 @@ fn forward_weibo(app: tauri::AppHandle) -> Result<(), String> {
 /// JS-callable command: saves icon key to config file so it
 /// persists across reboots. The window icon is updated immediately too.
 #[tauri::command]
-fn set_app_icon(window: tauri::Window, icon_key: String) -> Result<(), String> {
+fn set_app_icon(app_handle: tauri::AppHandle, icon_key: String) -> Result<(), String> {
     // Persist the choice
     if let Some(dir) = config_dir() {
         std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
         std::fs::write(dir.join("icon.txt"), &icon_key).map_err(|e| e.to_string())?;
     }
 
-    // Apply immediately to the window titlebar icon
+    // Apply immediately to all windows
     let bytes = icon_bytes_for_key(&icon_key);
     let image = Image::from_bytes(bytes).map_err(|e| e.to_string())?;
-    window.set_icon(image).map_err(|e| e.to_string())?;
+
+    if let Some(main_win) = app_handle.get_webview_window("main") {
+        let _ = main_win.set_icon(image.clone());
+    }
+    if let Some(settings_win) = app_handle.get_webview_window("settings") {
+        let _ = settings_win.set_icon(image);
+    }
 
     Ok(())
 }
@@ -213,7 +220,9 @@ fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
     if let Some(existing) = app_handle.get_webview_window("settings") {
         existing.set_focus().map_err(|e| e.to_string())?;
     } else {
-        tauri::WebviewWindowBuilder::new(
+        let main_win = app_handle.get_webview_window("main").ok_or("Main window not found")?;
+
+        let settings_win = tauri::WebviewWindowBuilder::new(
             &app_handle,
             "settings",
             tauri::WebviewUrl::App("settings.html".into()),
@@ -222,8 +231,17 @@ fn open_settings_window(app_handle: tauri::AppHandle) -> Result<(), String> {
         .inner_size(480.0, 520.0)
         .resizable(false)
         .center()
+        .skip_taskbar(true)
+        .parent(&main_win).map_err(|e| e.to_string())?
         .build()
         .map_err(|e| e.to_string())?;
+
+        // Apply current icon immediately to settings window as well
+        let saved_key = read_saved_icon_key();
+        let bytes = icon_bytes_for_key(&saved_key);
+        if let Ok(image) = Image::from_bytes(bytes) {
+            let _ = settings_win.set_icon(image);
+        }
     }
     Ok(())
 }
